@@ -1,10 +1,10 @@
-import { 
-    HAND_SIZE, 
-    CARD_DIMENSIONS, 
-    DISCARD_DIMENSIONS, 
-    HAND_CARD_GAP, 
-    DECK_X, 
-    UI_MARGIN 
+import {
+    HAND_SIZE,
+    CARD_DIMENSIONS,
+    DISCARD_DIMENSIONS,
+    HAND_CARD_GAP,
+    DECK_X,
+    UI_MARGIN
 } from "../enum/gameSizes";
 import { Deck } from "./Deck";
 
@@ -20,6 +20,7 @@ export class Player {
         this.deckX = 0;
         this.deckY = 0;
 
+        this.handX = 0;
         this.handY = 0;
 
         this.discardX = 0;
@@ -32,14 +33,19 @@ export class Player {
         this.width = canvasWidth;
         this.height = canvasHeight;
 
-        this.deckX = DECK_X;
-        this.deckY = canvasHeight - CARD_DIMENSIONS - UI_MARGIN;
+        const handWidth = this.getHandWidth();
+        const startX = this.getX(handWidth);
 
-        this.handY = canvasHeight - CARD_DIMENSIONS - UI_MARGIN;
+        this.deckX = startX;
+        this.handX = startX + CARD_DIMENSIONS + UI_MARGIN;
+        this.discardX = this.handX + handWidth + HAND_CARD_GAP;
 
-        this.discardX = canvasWidth - DISCARD_DIMENSIONS - DECK_X;
-        this.discardY = canvasHeight - DISCARD_DIMENSIONS - UI_MARGIN;
-    }
+        const h = canvasHeight - CARD_DIMENSIONS - UI_MARGIN
+
+        this.deckY = h;
+        this.handY = h;
+        this.discardY = canvasHeight - CARD_DIMENSIONS - 20;
+    } 
 
     update() {
         console.log('update');
@@ -52,8 +58,8 @@ export class Player {
     }
 
     renderHandCardPosition(index) {
-        const totalWidth = this.hand.length * CARD_DIMENSIONS + (this.hand.length - 1) * HAND_CARD_GAP;
-        const startX = (this.width - totalWidth) / 2;
+        const handWidth = this.getHandWidth();
+        const startX = (this.width - handWidth) / 2;
 
         return {
             x: startX + index * (CARD_DIMENSIONS + HAND_CARD_GAP),
@@ -86,6 +92,8 @@ export class Player {
     renderDiscard(ctx) {
         const card = this.discardPile[this.discardPile.length - 1];
 
+        this.debugDiscard(ctx);
+
         if (card) {
             card.renderBack(
                 ctx,
@@ -95,6 +103,35 @@ export class Player {
             );
 
         }
+    }
+
+    // temp
+    debugDiscard(ctx) {
+         ctx.save();
+
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+
+        ctx.strokeRect(
+            this.discardX,
+            this.discardY,
+            DISCARD_DIMENSIONS,
+            DISCARD_DIMENSIONS
+        );
+         ctx.restore();
+    }
+
+    getHandWidth() {
+        return (
+            this.hand.length * CARD_DIMENSIONS +
+            (this.hand.length - 1) * HAND_CARD_GAP
+        );
+    }
+
+    getX(handWidth) {
+        const totalWidth = CARD_DIMENSIONS + UI_MARGIN + handWidth + UI_MARGIN + DISCARD_DIMENSIONS;
+
+        return (this.width - totalWidth) / 2;
     }
 
     drawCards(amount) {
@@ -135,15 +172,6 @@ export class Player {
 
         return true;
     }
-
-    // getPointerPosition(e) {
-    //     const rect = this.canvas.getBoundingClientRect();
-
-    //     return {
-    //         x: e.clientX - rect.left,
-    //         y: e.clientY - rect.top
-    //     };
-    // }
 
     isPointInsideCard(x, y, cardX, cardY, size = CARD_DIMENSIONS) {
         return (
