@@ -8,6 +8,9 @@
   --baby-blue-ice: #a0c4ff;
   --periwinkle: #bdb2ff;
   --mauve: #ffc6ff;
+
+  --game-width: 1200;
+  --game-height: 760;
 }
 
 /* Moderate rainbow */
@@ -64,12 +67,14 @@ body {
 #game-container {
     width: 100vw;
     height: 100vh;
-    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #game {
     display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    width: min(100vw, calc(100vh * var(--game-width) / var(--game-height)));
+    height: min(100vh, calc(100vw * var(--game-height) / var(--game-width)));
+    aspect-ratio: var(--game-width) / var(--game-height);
 }

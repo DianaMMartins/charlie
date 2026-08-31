@@ -57,15 +57,15 @@ export class Game {
             this.startDrag(e);
         });
 
-        window.addEventListener("pointermove", (e) => {
+        this.canvas.addEventListener("pointermove", (e) => {
             this.updateDrag(e);
         });
 
-        window.addEventListener("pointerup", (e) => {
+        this.canvas.addEventListener("pointerup", (e) => {
             this.endDrag(e);
         });
 
-        window.addEventListener("pointercancel", () => {
+        this.canvas.addEventListener("pointercancel", () => {
             this.cancelDrag();
         });
     }
