@@ -1,4 +1,4 @@
-import { CARD_DIMENSIONS } from "../enum/gameSizes";
+import { BOARD_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
 import { CARD_BACK_IMAGE } from "../assets";
 
 export class Card {
@@ -26,12 +26,10 @@ export class Card {
     }
 
     renderCardBackImage(ctx, x, y, size) {
-         const radius = 8;
-
         ctx.save();
 
         ctx.beginPath();
-        ctx.roundRect(x, y, size, size, radius);
+        ctx.roundRect(x, y, size, size, BOARD_SIZE);
         ctx.clip();
 
         ctx.drawImage(
@@ -46,8 +44,6 @@ export class Card {
     }
 
     renderCardFront(ctx, x, y, size) {
-        const radius = 8;
-
         ctx.save();
 
         ctx.beginPath();
@@ -57,7 +53,7 @@ export class Card {
             y,
             size,
             size,
-            radius
+            BOARD_SIZE
         );
 
         ctx.fillStyle = "white";
@@ -86,8 +82,6 @@ export class Card {
     }
 
     renderRainbowBorder(ctx, x, y, size) {
-        const radius = 8;
-
         ctx.save();
 
         const gradient = ctx.createLinearGradient(
@@ -111,7 +105,7 @@ export class Card {
             y,
             size,
             size,
-            radius
+            BOARD_SIZE
         );
 
         ctx.strokeStyle = gradient;

@@ -4,7 +4,8 @@ import {
     DISCARD_DIMENSIONS,
     HAND_CARD_GAP,
     DECK_X,
-    UI_MARGIN
+    UI_MARGIN,
+    BOARD_SIZE
 } from "../enum/gameSizes";
 import { Deck } from "./Deck";
 
@@ -45,7 +46,7 @@ export class Player {
         this.deckY = h;
         this.handY = h;
         this.discardY = gameHeight - CARD_DIMENSIONS - 20;
-    } 
+    }
 
     update() {
         console.log('update');
@@ -92,8 +93,6 @@ export class Player {
     renderDiscard(ctx) {
         const card = this.discardPile[this.discardPile.length - 1];
 
-        this.debugDiscard(ctx);
-
         if (card) {
             card.renderBack(
                 ctx,
@@ -102,23 +101,27 @@ export class Player {
                 DISCARD_DIMENSIONS
             );
 
+        } else {
+            this.drawEmptyDiscard(ctx);
         }
     }
 
-    // temp
-    debugDiscard(ctx) {
-         ctx.save();
+    drawEmptyDiscard(ctx) {
+        ctx.save();
 
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 2;
+        ctx.fillStyle = "#d4d4d4";
+        ctx.beginPath();
 
-        ctx.strokeRect(
+        ctx.roundRect(
             this.discardX,
             this.discardY,
             DISCARD_DIMENSIONS,
-            DISCARD_DIMENSIONS
+            DISCARD_DIMENSIONS,
+            BOARD_SIZE
         );
-         ctx.restore();
+
+        ctx.fill();
+        ctx.restore();
     }
 
     getHandWidth() {
