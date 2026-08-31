@@ -1,3 +1,39 @@
+/* Pastel rainbow */
+:root {
+  --powder-blush: #ffadad;
+  --apricot-cream: #ffd6a5;
+  --lemon-chiffon: #fdffb6;
+  --tea-green: #caffbf;
+  --soft-cyan: #9bf6ff;
+  --baby-blue-ice: #a0c4ff;
+  --periwinkle: #bdb2ff;
+  --mauve: #ffc6ff;
+}
+
+/* Moderate rainbow */
+/* :root {
+  --coral-blush: #fb7b77;
+  --apricot-gold: #fdc170;
+  --lemon-glow: #f3f87f;
+  --fresh-green: #98f786;
+  --bright-cyan: #69ebfc;
+  --sky-blue: #6d9efc;
+  --vivid-periwinkle: #937df8;
+  --bright-mauve: #f78ef0;
+} */
+
+/* Bright rainbow */
+/* :root {
+  --powder-blush-dark: #fb7b77;
+  --apricot-cream-dark: #fdc170;
+  --lemon-chiffon-dark: #f3f87f;
+  --tea-green-dark: #98f786;
+  --soft-cyan-dark: #69ebfc;
+  --baby-blue-ice-dark: #6d9efc;
+  --periwinkle-dark: #937df8;
+  --mauve-dark: #f78ef0;
+} */
+
 html,
 body {
     margin: 0;
@@ -7,33 +43,37 @@ body {
 }
 
 body {
-    background: #fcf3a2;
+  background: var(--baby-blue-ice);
+}
+
+/* to implement */
+/* body {
+  background: linear-gradient(
+    40deg,
+    var(--powder-blush) 0%,
+    var(--apricot-cream) 14%,
+    var(--lemon-chiffon) 28%,
+    var(--tea-green) 42%,
+    var(--soft-cyan) 57%,
+    var(--baby-blue-ice) 71%,
+    var(--periwinkle) 85%,
+    var(--mauve) 100%
+  );
+} */
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #game {
     display: block;
-    width: 100vw;
-    height: 100vh;
+
+    width: 100%;
+    height: 100%;
+
     object-fit: contain;
-}
-
-#game {
-    width: 100vw;
-    height: 100vh;
-}
-
-@media (orientation: portrait) {
-    #game {
-        display: none;
-    }
-
-    body::after {
-        content: "Please rotate your device";
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100vw;
-        height: 100vh;
-        font-size: 24px;
-    }
 }

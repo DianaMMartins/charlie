@@ -29,9 +29,9 @@ export class Player {
         this.drawCards(HAND_SIZE);
     }
 
-    setLayout(canvasWidth, canvasHeight) {
-        this.width = canvasWidth;
-        this.height = canvasHeight;
+    setLayout(gameWidth, gameHeight) {
+        this.width = gameWidth;
+        this.height = gameHeight;
 
         const handWidth = this.getHandWidth();
         const startX = this.getX(handWidth);
@@ -40,11 +40,11 @@ export class Player {
         this.handX = startX + CARD_DIMENSIONS + UI_MARGIN;
         this.discardX = this.handX + handWidth + HAND_CARD_GAP;
 
-        const h = canvasHeight - CARD_DIMENSIONS - UI_MARGIN
+        const h = gameHeight - CARD_DIMENSIONS - UI_MARGIN
 
         this.deckY = h;
         this.handY = h;
-        this.discardY = canvasHeight - CARD_DIMENSIONS - 20;
+        this.discardY = gameHeight - CARD_DIMENSIONS - 20;
     } 
 
     update() {

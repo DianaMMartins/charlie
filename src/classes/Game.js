@@ -1,13 +1,14 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
+import { BOARD_Y, GAME_HEIGHT, GAME_WIDTH } from "../enum/gameSizes";
 
 export class Game {
     constructor() {
         this.canvas = document.querySelector("#game");
         this.ctx = this.canvas.getContext("2d");
 
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.canvas.width = GAME_WIDTH;
+        this.canvas.height = GAME_HEIGHT;
 
         this.board = new Board();
         this.player = new Player();
@@ -70,12 +71,12 @@ export class Game {
     }
 
     layout() {
-        this.board.x = (this.canvas.width - this.board.width) / 2;
-        this.board.y = 40;
+        this.board.x = (GAME_WIDTH - this.board.width) / 2;
+        this.board.y = BOARD_Y;
 
         this.player.setLayout(
-            this.canvas.width,
-            this.canvas.height 
+            GAME_WIDTH,
+            GAME_HEIGHT
         );
     }
 

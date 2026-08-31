@@ -1,5 +1,8 @@
 export const UI_MARGIN = 30;
 
+export const GAME_WIDTH = 1200;
+export const GAME_HEIGHT = 760;
+
 export const BOARD_SIZE = 8;
 export const BOARD_TILE_SIZE = 69;
 export const BOARD_Y = 40;
