@@ -137,14 +137,16 @@ export class Player {
         return (this.width - totalWidth) / 2;
     }
 
-    drawCards(amount) {
+    drawCards(amount) {        
         for (let i = 0; i < amount; i++) {
             const card = this.deck.draw();
-
+           
             if (card) {
                 this.hand.push(card);
             }
         }
+
+        this.deck.finishSetup();
     }
 
     discard(card) {

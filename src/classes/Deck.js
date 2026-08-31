@@ -4,6 +4,9 @@ import { Card } from "./Card";
 export class Deck {
     constructor() {
         this.cards = [];
+        this.topDeck = [];
+        this.bottomDeck = [];
+
         this.deckSize = DECK_SIZE;
 
         this.create();
@@ -14,18 +17,21 @@ export class Deck {
         for (let value = 1; value <= this.deckSize; value++) {
             this.cards.push(new Card(value));
         }
-    }
 
-    shuffle() {
-        for (let i = this.cards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-
-            [this.cards[i], this.cards[j]] =
-                [this.cards[j], this.cards[i]];
+        for (let value = 1; value <= 5; value++) {
+            this.cards.push(new Card('Finish'));
         }
     }
 
-    draw() {
+    shuffle(cards = this.cards) {        
+        for (let i = cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+
+            [cards[i], cards[j]] = [cards[j], cards[i]];
+        }
+    }
+
+    draw() {        
         const card = this.cards.pop();
 
         if (card) {
@@ -35,5 +41,16 @@ export class Deck {
         return card;
     }
 
-    
+    finishSetup() {  
+        const half = Math.ceil(this.cards.length / 2);
+
+        this.topDeck = this.cards.splice(0, half);
+        this.bottomDeck = this.cards.splice(0);
+
+        this.topDeck.push(new Card('Start'));
+
+        this.shuffle(this.topDeck);
+        
+        this.cards = this.topDeck.concat(this.bottomDeck);
+    }
 }
