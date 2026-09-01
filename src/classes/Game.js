@@ -1,6 +1,7 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
 import { BOARD_Y, GAME_HEIGHT, GAME_WIDTH } from "../enum/gameSizes";
+import { FINISH, PLAY, START } from "../enum/cardTypes.";
 
 export class Game {
     constructor() {
@@ -155,18 +156,75 @@ export class Game {
             return false;
         }
 
-        const placed = this.board.placeCard(row, col, card);
+        const cell = this.board.getCell(row, col);
 
-        if (!placed) {
+        if (!cell || cell.card !== null) {
+            this.cancelDrag();
+            return false;
+        }
+
+        const played = this.playCard(cell, card)
+
+        if (!played) {
             this.cancelDrag();
             return false;
         }
 
         this.player.removeCard(card);
-
         this.cancelDrag();
 
         return true;
+    }
+
+    playCard(cell, card) {
+        if (cell.type === START) {
+            return this.playStartCard(cell, card);
+        } else if (cell.type === FINISH) {
+            return this.playFinishCard(cell, card);
+        } else if (cell.type === PLAY) {
+            return this.playNCard(cell, card);
+        }
+
+        return false;
+    }
+
+    playStartCard(cell, card) {
+        this.board.placeCard(cell.row, cell.col, card);
+        this.player.drawCards(8);
+
+        return true;
+
+        // place card in start position
+        // draw 8 cards to playe hand
+        // make player discard 8 cards
+    }
+
+    playFinishCard(cell, card) {
+        // check if board is full
+        // if board is full play finish card in finish position
+        // show win screen & end game
+        this.board.placeCard(cell.row, cell.col, card);
+
+        return true;
+    }
+
+    playNCard(cell, card) {
+        // if all cards bellow played card are lower numbers
+        // if lower, play card
+        // if played next to another card 
+        // discard cards with value difference (payCardToll)
+
+        const isValidPlacement = this.board.validatePlayedCard(cell, card);
+
+        console.log(isValidPlacement);
+
+        if (isValidPlacement) {
+            this.board.placeCard(cell.row, cell.col, card);
+
+            return true;
+        }
+
+        return false;
     }
 
     renderDraggedCard() {

@@ -1,3 +1,4 @@
+import { BLOCKED, FINISH, PLAY, START } from "../enum/cardTypes.";
 import { BOARD_SIZE, BOARD_TILE_SIZE } from "../enum/gameSizes";
 
 export class Board {
@@ -14,20 +15,6 @@ export class Board {
         this.playableArea = 6;
 
         this.cells = [];
-
-        this.startSpace = {
-            row: 7,
-            col: 0,
-            type: "start",
-            card: null
-        };
-
-        this.finishSpace = {
-            row: 0,
-            col: 7,
-            type: "finish",
-            card: null
-        };
 
         this.createCells();
     }
@@ -124,17 +111,20 @@ export class Board {
     createCells() {
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size; col++) {
+                let type = BLOCKED;
 
-                const playable =
-                    row >= 1 &&
-                    row <= 6 &&
-                    col >= 1 &&
-                    col <= 6;
+                if (row >= 1 && row <= 6 && col >= 1 && col <= 6) {
+                    type = PLAY;
+                } else if (row === 7 && col === 0) {
+                    type = START;
+                } else if (row === 0 && col === 7) {
+                    type = FINISH;
+                }
 
                 this.cells.push({
                     row,
                     col,
-                    playable,
+                    type,
                     card: null
                 });
             }
@@ -150,7 +140,7 @@ export class Board {
 
     renderCards(ctx) {
         for (const cell of this.cells) {
-            if (!cell.playable || !cell.card) {
+            if (cell.type === BLOCKED || !cell.card) {
                 continue;
             }
 
@@ -164,17 +154,53 @@ export class Board {
     }
 
     placeCard(row, col, card) {
-        const cell = this.cells.find(
-            cell => cell.row === row && cell.col === col
-        );
+        const cell = this.getCell(row, col);
 
-        if (!cell || !cell.playable || cell.card) {
+        if (!cell || cell.card) {
             return false;
         }
 
         cell.card = card;
+       
+        return true;
+    }
+
+    getCell(row, col) {
+        return this.cells.find(
+            cell => cell.row === row && cell.col === col
+        );
+    }
+
+    validatePlayedCard(cell, card) {
+        const cells = this.getPlayableCells();
+
+        if (cells.filter(cell => cell.card).length === 0) {
+            return true;
+        }
+
+        const i = cells.indexOf(cell);
+
+        const before = cells.slice(0, i).reverse().find(cell => cell.card);
+        const after = cells.slice(i + 1).find(cell => cell.card);
+
+        if (before && card.value < before.card.value || after && card.value > after.card.value) {
+            return false;
+        }
 
         return true;
+    }
+
+    getPlayableCells() {
+        return this.cells
+            .filter(cell => cell.type === PLAY)
+            .sort((a, b) => {             
+                if (a.row !== b.row) {
+                    return b.row - a.row;
+                }
+
+
+                return a.col - b.col;
+            });
     }
 
     getCellAtPosition(x, y) {
@@ -186,9 +212,9 @@ export class Board {
             (y - this.y) / this.cellSize
         );
 
-        const cell = this.cells.find(cell => cell.row === row && cell.col === col)
+        const cell = this.getCell(row, col);
 
-        if (!cell || !cell.playable) {
+        if (!cell || cell.type === BLOCKED) {
             return null;
         }
 
