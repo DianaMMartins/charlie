@@ -1,11 +1,10 @@
 import {
     HAND_SIZE,
+    BOARD_SIZE,
     CARD_DIMENSIONS,
-    DISCARD_DIMENSIONS,
     HAND_CARD_GAP,
-    DECK_X,
-    UI_MARGIN,
-    BOARD_SIZE
+    DISCARD_DIMENSIONS,
+    UI_MARGIN
 } from "../enum/gameSizes";
 import { Deck } from "./Deck";
 
@@ -27,12 +26,19 @@ export class Player {
         this.discardX = 0;
         this.discardY = 0;
 
+        this.scale = 1;
+
+        this.cardSize = CARD_DIMENSIONS;
+        this.cardGap = HAND_CARD_GAP;
+        this.discardSize = DISCARD_DIMENSIONS;
+        this.uiMargin = UI_MARGIN;
+
         this.selectedCards = [];
 
         this.drawCards(HAND_SIZE);
     }
 
-    setLayout(gameWidth, gameHeight) {
+    setLayout(gameWidth, gameHeight, y) {
         this.width = gameWidth;
         this.height = gameHeight;
 
@@ -40,14 +46,44 @@ export class Player {
         const startX = this.getX(handWidth);
 
         this.deckX = startX;
-        this.handX = startX + CARD_DIMENSIONS + UI_MARGIN;
-        this.discardX = this.handX + handWidth + HAND_CARD_GAP;
+        this.handX = startX + this.cardSize + this.uiMargin;
+        this.discardX = this.handX + handWidth + this.cardGap;
 
-        const h = gameHeight - CARD_DIMENSIONS - UI_MARGIN
+        this.deckY = y;
+        this.handY = y;
+        this.discardY = y;
+    }
 
-        this.deckY = h;
-        this.handY = h;
-        this.discardY = gameHeight - CARD_DIMENSIONS - 20;
+    setScale(scale) {
+        this.scale = scale;
+
+        this.cardSize = CARD_DIMENSIONS * scale;
+        this.cardGap = HAND_CARD_GAP * scale;
+        this.discardSize = DISCARD_DIMENSIONS * scale;
+        this.uiMargin = UI_MARGIN * scale;
+    }
+
+    getBaseWidth() {
+        return (
+            CARD_DIMENSIONS +
+            UI_MARGIN +
+            (HAND_SIZE * CARD_DIMENSIONS) +
+            ((HAND_SIZE - 1) * HAND_CARD_GAP) +
+            UI_MARGIN +
+            DISCARD_DIMENSIONS
+        );
+    }
+
+    getScale(screenWidth) {
+        return Math.min(
+            1,
+            (screenWidth * 0.9) / this.getBaseWidth()
+        );
+    }
+
+    resize(screenWidth) {
+        const scale = this.getScale(screenWidth);
+        this.setScale(scale);
     }
 
     update() {
@@ -65,7 +101,7 @@ export class Player {
         const startX = (this.width - handWidth) / 2;
 
         return {
-            x: startX + index * (CARD_DIMENSIONS + HAND_CARD_GAP),
+            x: startX + index * (this.cardSize + this.cardGap),
             y: this.handY
         };
     }
@@ -80,7 +116,7 @@ export class Player {
 
             const { x, y } = this.renderHandCardPosition(i);
 
-            card.render(ctx, x, y);
+            card.render(ctx, x, y, this.cardSize);
         }
     }
 
@@ -88,7 +124,7 @@ export class Player {
         const topCard = this.deck.cards[this.deck.cards.length - 1];
 
         if (topCard) {
-            topCard.render(ctx, this.deckX, this.deckY, CARD_DIMENSIONS);
+            topCard.render(ctx, this.deckX, this.deckY, this.cardSize);
         }
     }
 
@@ -100,7 +136,7 @@ export class Player {
                 ctx,
                 this.discardX,
                 this.discardY,
-                DISCARD_DIMENSIONS
+                this.cardSize
             );
 
         } else {
@@ -117,8 +153,8 @@ export class Player {
         ctx.roundRect(
             this.discardX,
             this.discardY,
-            DISCARD_DIMENSIONS,
-            DISCARD_DIMENSIONS,
+            this.cardSize,
+            this.cardSize,
             BOARD_SIZE
         );
 
@@ -128,21 +164,21 @@ export class Player {
 
     getHandWidth() {
         return (
-            this.hand.length * CARD_DIMENSIONS +
-            (this.hand.length - 1) * HAND_CARD_GAP
+            this.hand.length * this.cardSize +
+            (this.hand.length - 1) * this.cardGap
         );
     }
 
     getX(handWidth) {
-        const totalWidth = CARD_DIMENSIONS + UI_MARGIN + handWidth + UI_MARGIN + DISCARD_DIMENSIONS;
+        const totalWidth = this.cardSize + this.uiMargin + handWidth + this.uiMargin + this.cardSize;
 
         return (this.width - totalWidth) / 2;
     }
 
-    drawCards(amount) {        
+    drawCards(amount) {
         for (let i = 0; i < amount; i++) {
             const card = this.deck.draw();
-           
+
             if (card) {
                 this.hand.push(card);
             }
@@ -192,7 +228,7 @@ export class Player {
         return null;
     }
 
-    isPointInsideCard(x, y, cardX, cardY, size = CARD_DIMENSIONS) {
+    isPointInsideCard(x, y, cardX, cardY, size = this.cardSize) {
         return (
             x >= cardX &&
             x <= cardX + size &&
@@ -207,7 +243,7 @@ export class Player {
             y,
             this.discardX,
             this.discardY,
-            DISCARD_DIMENSIONS
+            this.cardSize
         );
     }
 

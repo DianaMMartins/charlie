@@ -4,6 +4,9 @@ import { BOARD_SIZE, BOARD_TILE_SIZE } from "../enum/gameSizes";
 export class Board {
     constructor() {
         this.size = BOARD_SIZE;
+
+        this.baseCellSize = BOARD_TILE_SIZE;
+        this.scale = 1;
         this.cellSize = BOARD_TILE_SIZE;
 
         this.width = this.size * this.cellSize;
@@ -27,6 +30,27 @@ export class Board {
         this.renderCards(ctx);
 
         ctx.restore();
+    }
+
+    setScale(scale) {
+        this.scale = scale;
+
+        this.cellSize = this.baseCellSize * scale;
+
+        this.width = this.size * this.cellSize;
+        this.height = this.size * this.cellSize;
+    }
+
+    getScale(screenWidth) {
+        return Math.min(
+            1,
+            (screenWidth * 0.9) / (this.size * this.baseCellSize)
+        );
+    }
+
+    resize(screenWidth) {
+        const scale = this.getScale(screenWidth);
+        this.setScale(scale);
     }
 
     renderGrid(ctx) {

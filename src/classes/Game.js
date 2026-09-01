@@ -1,6 +1,6 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { BOARD_Y, GAME_HEIGHT, GAME_WIDTH, HAND_SIZE } from "../enum/gameSizes";
+import { BOARD_SIZE, BOARD_TILE_SIZE, BOARD_Y, GAME_HEIGHT, GAME_WIDTH, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { END_GAME, START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, DRAW_MSG, PLAY_CARD } from "../enum/gameStatus";
 
@@ -14,8 +14,16 @@ export class Game {
 
         this.board = new Board();
         this.player = new Player();
+        
+        this.layoutGap = UI_MARGIN;
+        this.messageHeight = 20;
 
         this.layout();
+        this.resize();
+
+        window.addEventListener("resize", () => {
+            this.resize();
+        })
 
         this.status = START_GAME;
         this.action = null
@@ -54,8 +62,20 @@ export class Game {
         // 
         // }
 
-
         requestAnimationFrame(() => this.loop());
+    }
+
+    resize() {
+        const screenWidth = window.innerWidth;
+        const height = window.innerHeight;
+
+        this.canvas.width = screenWidth;
+        this.canvas.height = height;
+
+        this.board.resize(screenWidth);
+        this.player.resize(screenWidth);
+
+        this.layout();
     }
 
     gameLogicUpdate() {
@@ -90,8 +110,8 @@ export class Game {
 
         this.ctx.fillText(
             this.message,
-            GAME_WIDTH / 2,
-            this.player.handY - 50
+            this.canvas.width / 2,
+            this.messageY
         );
 
         this.ctx.restore();
@@ -116,12 +136,53 @@ export class Game {
     }
 
     layout() {
-        this.board.x = (GAME_WIDTH - this.board.width) / 2;
-        this.board.y = BOARD_Y;
+        const startY = this.getLayoutStartY();
+
+        this.layoutBoard(startY);
+        this.layoutMessage();
+        this.layoutPlayer();
+    }
+
+    getLayoutStartY() {
+        const totalHeight = this.getLayoutHeight();
+
+        return (this.canvas.height - totalHeight) / 2;
+    }
+
+    getLayoutHeight() {
+        return (
+            this.board.height +
+            this.messageHeight +
+            this.player.cardSize +
+            this.layoutGap * 2
+        );
+    }
+
+    layoutBoard(startY) {
+        this.board.x =
+            (this.canvas.width - this.board.width) / 2;
+
+        this.board.y = startY;
+    }
+
+    layoutMessage() {
+        this.messageY =
+            this.board.y +
+            this.board.height +
+            this.layoutGap +
+            this.messageHeight / 2;
+    }
+
+    layoutPlayer() {
+        const playerY =
+            this.messageY +
+            this.messageHeight / 2 +
+            this.layoutGap;
 
         this.player.setLayout(
-            GAME_WIDTH,
-            GAME_HEIGHT
+            this.canvas.width,
+            this.canvas.height,
+            playerY
         );
     }
 
@@ -136,7 +197,7 @@ export class Game {
             y: (e.clientY - rect.top) * scaleY
         };
     }
-
+    
     startDrag(e) {
         const { x, y } = this.getPointerPosition(e);
         const card = this.player.getCardAtPosition(x, y);
@@ -233,7 +294,7 @@ export class Game {
             this.cancelDrag();
             return false;
         }
-        
+
         const card = this.draggedCard;
 
         if (!card) {
@@ -249,7 +310,7 @@ export class Game {
             this.endTurn();
         } else {
             this.message = DISCARD_MSG;
-            
+
             this.cancelDrag();
         }
 
@@ -318,10 +379,10 @@ export class Game {
         this.action = null;
         this.discardCount = 0;
         this.message = PLAY_MSG;
-        
+
         //probably move this to be a button!
-        this.player.drawCards(HAND_SIZE -this.player.hand.length);
+        this.player.drawCards(HAND_SIZE - this.player.hand.length);
 
         this.cancelDrag();
     }
-}
+} 1
