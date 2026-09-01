@@ -136,25 +136,48 @@ export class Player {
                 ctx,
                 this.discardX,
                 this.discardY,
-                this.cardSize
+                this.discardSize
             );
 
+            this.renderDiscardOverlay(ctx);
         } else {
             this.drawEmptyDiscard(ctx);
         }
     }
 
+    renderDiscardOverlay(ctx) {
+        ctx.save();
+
+        const padding = 1;
+
+        ctx.fillStyle = "rgb(212, 212, 212, 0.7)";
+
+        ctx.beginPath();
+
+        ctx.roundRect(
+            this.discardX - padding,
+            this.discardY - padding,
+            this.discardSize + padding * 2,
+            this.discardSize + padding * 2,
+            BOARD_SIZE
+        );
+
+        ctx.fill();
+
+        ctx.restore();
+    }
+
     drawEmptyDiscard(ctx) {
         ctx.save();
 
-        ctx.fillStyle = "#d4d4d4";
+        ctx.fillStyle = "rgb(212, 212, 212)";
         ctx.beginPath();
 
         ctx.roundRect(
             this.discardX,
             this.discardY,
-            this.cardSize,
-            this.cardSize,
+            this.discardSize,
+            this.discardSize,
             BOARD_SIZE
         );
 
@@ -243,7 +266,7 @@ export class Player {
             y,
             this.discardX,
             this.discardY,
-            this.cardSize
+            this.discardSize
         );
     }
 
