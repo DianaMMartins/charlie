@@ -1,7 +1,8 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { BOARD_Y, GAME_HEIGHT, GAME_WIDTH } from "../enum/gameSizes";
-import { FINISH, PLAY, START } from "../enum/cardTypes.";
+import { BOARD_Y, GAME_HEIGHT, GAME_WIDTH, HAND_SIZE } from "../enum/gameSizes";
+import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
+import { END_GAME, START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, DRAW_MSG, PLAY_CARD } from "../enum/gameStatus";
 
 export class Game {
     constructor() {
@@ -16,6 +17,12 @@ export class Game {
 
         this.layout();
 
+        this.status = START_GAME;
+        this.action = null
+
+        this.discardCount = 0;
+        this.message = "";
+
         this.draggedCard = null;
         this.dragging = false;
 
@@ -29,12 +36,24 @@ export class Game {
     }
 
     start() {
+        this.selectGamePlay();
+
         this.loop();
     }
 
     loop() {
         this.gameLogicUpdate();
+
+        // if (this.status === START_GAME) {
+        //     console.log('game start');
+
+        // } else if (this.status === END_GAME) {
+
+        // } else {
         this.drawGameRender();
+        // 
+        // }
+
 
         requestAnimationFrame(() => this.loop());
     }
@@ -48,9 +67,34 @@ export class Game {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.board.render(this.ctx);
+        this.renderMessage();
         this.player.render(this.ctx, this.draggedCard);
 
         this.renderDraggedCard();
+    }
+
+    selectGamePlay() {
+        this.status = GAME_PLAY;
+        this.action = null;
+        this.discardCount = 0;
+        this.message = PLAY_MSG;
+    }
+
+    renderMessage() {
+        this.ctx.save();
+
+        this.ctx.fillStyle = "black";
+        this.ctx.font = "20px sans-serif";
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
+
+        this.ctx.fillText(
+            this.message,
+            GAME_WIDTH / 2,
+            this.player.handY - 50
+        );
+
+        this.ctx.restore();
     }
 
     setupInput() {
@@ -136,12 +180,20 @@ export class Game {
 
         const boardCell = this.board.getCellAtPosition(x, y);
 
-        if (!boardCell) {
-            this.cancelDrag();
+        if (boardCell) {
+            this.dropCardOnBoard(boardCell);
+
             return;
         }
 
-        this.dropCard(boardCell.row, boardCell.col);
+        const discardCell = this.player.isPointInsideDiscard(x, y);
+
+        if (discardCell) {
+            this.dropCardOnDiscard();
+            return
+        }
+
+        this.cancelDrag();
     }
 
     cancelDrag() {
@@ -149,20 +201,19 @@ export class Game {
         this.dragging = false;
     }
 
-    dropCard(row, col) {
+    dropCardOnBoard(cell) {
+        if (this.action === DISCARD_CARD) {
+            this.cancelDrag();
+            return false;
+        }
+
         const card = this.draggedCard;
 
         if (!card) {
             return false;
         }
 
-        const cell = this.board.getCell(row, col);
-
-        if (!cell || cell.card !== null) {
-            this.cancelDrag();
-            return false;
-        }
-
+        this.action = PLAY_CARD;
         const played = this.playCard(cell, card)
 
         if (!played) {
@@ -171,17 +222,46 @@ export class Game {
         }
 
         this.player.removeCard(card);
-        this.cancelDrag();
+
+        this.endTurn();
+
+        return true;
+    }
+
+    dropCardOnDiscard() {
+        if (this.action === PLAY_CARD) {
+            this.cancelDrag();
+            return false;
+        }
+        
+        const card = this.draggedCard;
+
+        if (!card) {
+            return false;
+        }
+
+        this.action = DISCARD_CARD;
+
+        this.player.discard(card);
+        this.discardCount++;
+
+        if (this.discardCount === 2) {
+            this.endTurn();
+        } else {
+            this.message = DISCARD_MSG;
+            
+            this.cancelDrag();
+        }
 
         return true;
     }
 
     playCard(cell, card) {
-        if (cell.type === START) {
+        if (cell.type === START_CARD) {
             return this.playStartCard(cell, card);
-        } else if (cell.type === FINISH) {
+        } else if (cell.type === FINISH_CARD) {
             return this.playFinishCard(cell, card);
-        } else if (cell.type === PLAY) {
+        } else if (cell.type === NUMBER_CARD) {
             return this.playNCard(cell, card);
         }
 
@@ -209,14 +289,9 @@ export class Game {
     }
 
     playNCard(cell, card) {
-        // if all cards bellow played card are lower numbers
-        // if lower, play card
         // if played next to another card 
         // discard cards with value difference (payCardToll)
-
         const isValidPlacement = this.board.validatePlayedCard(cell, card);
-
-        console.log(isValidPlacement);
 
         if (isValidPlacement) {
             this.board.placeCard(cell.row, cell.col, card);
@@ -237,5 +312,16 @@ export class Game {
             this.dragX,
             this.dragY
         )
+    }
+
+    endTurn() {
+        this.action = null;
+        this.discardCount = 0;
+        this.message = PLAY_MSG;
+        
+        //probably move this to be a button!
+        this.player.drawCards(HAND_SIZE -this.player.hand.length);
+
+        this.cancelDrag();
     }
 }

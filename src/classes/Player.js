@@ -27,6 +27,8 @@ export class Player {
         this.discardX = 0;
         this.discardY = 0;
 
+        this.selectedCards = [];
+
         this.drawCards(HAND_SIZE);
     }
 
@@ -178,15 +180,6 @@ export class Player {
         return true;
     }
 
-    isPointInsideCard(x, y, cardX, cardY, size = CARD_DIMENSIONS) {
-        return (
-            x >= cardX &&
-            x <= cardX + size &&
-            y >= cardY &&
-            y <= cardY + size
-        )
-    }
-
     getCardAtPosition(x, y) {
         for (let i = 0; i < this.hand.length; i++) {
             const { x: cardX, y: cardY } = this.renderHandCardPosition(i);
@@ -197,6 +190,25 @@ export class Player {
         }
 
         return null;
+    }
+
+    isPointInsideCard(x, y, cardX, cardY, size = CARD_DIMENSIONS) {
+        return (
+            x >= cardX &&
+            x <= cardX + size &&
+            y >= cardY &&
+            y <= cardY + size
+        )
+    }
+
+    isPointInsideDiscard(x, y) {
+        return this.isPointInsideCard(
+            x,
+            y,
+            this.discardX,
+            this.discardY,
+            DISCARD_DIMENSIONS
+        );
     }
 
     removeCard(card) {

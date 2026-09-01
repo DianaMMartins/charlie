@@ -1,4 +1,4 @@
-import { BLOCKED, FINISH, PLAY, START } from "../enum/cardTypes.";
+import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { BOARD_SIZE, BOARD_TILE_SIZE } from "../enum/gameSizes";
 
 export class Board {
@@ -111,14 +111,16 @@ export class Board {
     createCells() {
         for (let row = 0; row < this.size; row++) {
             for (let col = 0; col < this.size; col++) {
-                let type = BLOCKED;
+                let type = null;
 
+                console.log(type);
+                
                 if (row >= 1 && row <= 6 && col >= 1 && col <= 6) {
-                    type = PLAY;
+                    type = NUMBER_CARD;
                 } else if (row === 7 && col === 0) {
-                    type = START;
+                    type = START_CARD;
                 } else if (row === 0 && col === 7) {
-                    type = FINISH;
+                    type = FINISH_CARD;
                 }
 
                 this.cells.push({
@@ -140,7 +142,7 @@ export class Board {
 
     renderCards(ctx) {
         for (const cell of this.cells) {
-            if (cell.type === BLOCKED || !cell.card) {
+            if (cell.type === null || !cell.card) {
                 continue;
             }
 
@@ -183,7 +185,10 @@ export class Board {
         const before = cells.slice(0, i).reverse().find(cell => cell.card);
         const after = cells.slice(i + 1).find(cell => cell.card);
 
-        if (before && card.value < before.card.value || after && card.value > after.card.value) {
+        if (
+             (before && card.value <= before.card.value) ||
+             (after && card.value >= after.card.value)
+        ) {
             return false;
         }
 
@@ -192,7 +197,7 @@ export class Board {
 
     getPlayableCells() {
         return this.cells
-            .filter(cell => cell.type === PLAY)
+            .filter(cell => cell.type === NUMBER_CARD)
             .sort((a, b) => {             
                 if (a.row !== b.row) {
                     return b.row - a.row;
@@ -214,7 +219,7 @@ export class Board {
 
         const cell = this.getCell(row, col);
 
-        if (!cell || cell.type === BLOCKED) {
+        if (!cell || cell.type === null) {
             return null;
         }
 

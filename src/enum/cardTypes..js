@@ -1,5 +1,4 @@
-export const START = 'start';
-export const FINISH = 'finish';
-export const PLAY = 'play'
+export const START_CARD = 'start';
+export const FINISH_CARD = 'finish';
 
-export const BLOCKED = 'blocked';
+export const NUMBER_CARD = 'number';
