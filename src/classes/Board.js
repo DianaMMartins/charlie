@@ -137,8 +137,6 @@ export class Board {
             for (let col = 0; col < this.size; col++) {
                 let type = null;
 
-                console.log(type);
-                
                 if (row >= 1 && row <= 6 && col >= 1 && col <= 6) {
                     type = NUMBER_CARD;
                 } else if (row === 7 && col === 0) {
@@ -251,9 +249,6 @@ export class Board {
     }
 
     isFull() {
-        console.log(this.cells);
-        
-        // this.isStartPlayed;
-        // this.cells;
+        return this.getPlayableCells().every(cell => cell.card !== null);
     }
 }

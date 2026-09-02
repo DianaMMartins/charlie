@@ -88,7 +88,7 @@ export class Player {
     }
 
     update() {
-        console.log('update');
+        // console.log('update');
     }
 
     render(ctx, draggedCard = null) {
@@ -200,13 +200,18 @@ export class Player {
     }
 
     drawCards(amount) {
+        const drawnCards = [];
+
         for (let i = 0; i < amount; i++) {
             const card = this.deck.draw();
 
             if (card) {
                 this.hand.push(card);
+                drawnCards.push(card);
             }
         }
+
+        return drawnCards;
     }
 
     discard(card) {

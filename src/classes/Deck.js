@@ -31,7 +31,7 @@ export class Deck {
     }
 
     draw() {        
-        const card = this.cards.pop();
+        const card = this.cards.shift();
 
         if (card) {
             card.revealed = true;
@@ -49,7 +49,7 @@ export class Deck {
         this.topDeck.push(new Card(START_CARD));
 
         this.shuffle(this.topDeck);
-        
+                
         this.cards = this.topDeck.concat(this.bottomDeck);
     }
 }

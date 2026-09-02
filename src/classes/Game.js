@@ -1,8 +1,8 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { BOARD_SIZE, BOARD_TILE_SIZE, BOARD_Y, GAME_HEIGHT, GAME_WIDTH, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
+import { HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
-import { END_GAME, START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, DRAW_MSG, PLAY_CARD } from "../enum/gameStatus";
+import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS } from "../enum/gameStatus";
 
 export class Game {
     constructor() {
@@ -44,7 +44,7 @@ export class Game {
 
         this.loop();
     }
-    
+
     selectGamePlay() {
         this.status = GAME_PLAY;
         this.action = null;
@@ -91,11 +91,17 @@ export class Game {
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "middle";
 
-        this.ctx.fillText(
-            this.message,
-            this.canvas.width / 2,
-            this.messageY
-        );
+        const lines = this.message.split("\n");
+        const lineHeight = 24;
+        const startY = this.messageY - ((lines.length - 1) * lineHeight) / 2;
+
+        lines.forEach((line, index) => {
+            this.ctx.fillText(
+                line,
+                this.canvas.width / 2,
+                startY + index * lineHeight
+            );
+        });
 
         this.ctx.restore();
     }
@@ -271,48 +277,54 @@ export class Game {
     }
 
     dropCardOnBoard(cell) {
-        if (this.action === DISCARD_CARD) {
-            this.cancelDrag();
-            return false;
-        }
-
         const card = this.draggedCard;
 
         if (!card) {
-            return false;
+            return;
         }
 
-        this.action = PLAY_CARD;
-        const played = this.playCard(cell, card)
-
-        if (!played) {
+        if (!this.playCard(cell, card)) {
             this.cancelDrag();
-            return false;
+            return;
         }
 
         this.player.removeCard(card);
 
-        this.endTurn();
+        if (this.action === DISCARD_START_CARDS) {
+            this.discardCount = 0;
+            this.cancelDrag();
 
-        return true;
+            return;
+        }
+
+        this.endTurn();
     }
 
     dropCardOnDiscard() {
-        if (this.action === PLAY_CARD) {
-            this.cancelDrag();
-            return false;
-        }
-
         const card = this.draggedCard;
 
         if (!card) {
             return false;
         }
 
-        this.action = DISCARD_CARD;
-
         this.player.discard(card);
         this.discardCount++;
+
+        if (this.action === DISCARD_START_CARDS) {
+            if (this.discardCount === 8) {
+                this.endTurn();
+            } else {
+                const cardsLeft = 8 - this.discardCount;
+
+                this.message = `Discard ${cardsLeft} card${cardsLeft > 1 ? 's' : ''}`;
+
+                this.cancelDrag();
+            }
+
+            return;
+        }
+
+        this.action = DISCARD_CARD;
 
         if (this.discardCount === 2) {
             this.endTurn();
@@ -326,65 +338,90 @@ export class Game {
     }
 
     playCard(cell, card) {
-        console.log(card.value, cell.type);
-
-        if (card.value === START_CARD && cell.type === START_CARD) {
+        if (this.action === PLAY_START_CARD) {
             return this.playStartCard(cell, card);
-        } else if (card.value === FINISH_CARD && cell.type === FINISH_CARD) {
+        }
+
+        if (card.value === FINISH_CARD) {
             return this.playFinishCard(cell, card);
-        } else if (typeof (card.value) === 'number' && cell.type === NUMBER_CARD) {
+        }
+
+        if (typeof card.value === 'number' && this.action !== DISCARD_START_CARDS) {
             return this.playNCard(cell, card);
         }
+
+        return false;
     }
 
     playStartCard(cell, card) {
-        console.log(cell);
+        if (
+            card.value !== START_CARD ||
+            cell.type !== START_CARD
+        ) {
+            return false;
+        }
 
         this.board.placeCard(cell.row, cell.col, card);
         this.player.drawCards(8);
 
-        return true;
+        this.action = DISCARD_START_CARDS;
 
-        // place card in start position
-        // draw 8 cards to playe hand
-        // make player discard 8 cards
+        return true;
     }
 
     playFinishCard(cell, card) {
-        console.log(cell);
+        if (cell.type !== FINISH_CARD) {
+            return false;
+        }
 
-        this.board.isFull();
+        if (!this.board.isFull()) {
+            this.message = COMPLETE_BOARD_MSG + "\n" + PLAY_MSG;
+            // show win screen
+
+            return false;
+        }
+
+        this.board.placeCard(cell.row, cell.col, card);
 
         // check if board is full
         // if board is full play finish card in finish position
         // show win screen & end game
-        this.board.placeCard(cell.row, cell.col, card);
-
         return true;
     }
 
     playNCard(cell, card) {
         // if played next to another card 
         // discard cards with value difference (payCardToll)
-        const isValidPlacement = this.board.validatePlayedCard(cell, card);
-
-        if (isValidPlacement) {
-            this.board.placeCard(cell.row, cell.col, card);
-
-            return true;
+        if (cell.type !== NUMBER_CARD) {
+            return false;
         }
 
-        return false;
+        if (!this.board.validatePlayedCard(cell, card)) {
+            return false;
+        }
+
+        this.board.placeCard(cell.row, cell.col, card);
+
+        return true;
     }
 
     endTurn() {
-        this.action = null;
         this.discardCount = 0;
-        this.message = PLAY_MSG;
 
-        //probably move this to be a button!
-        this.player.drawCards(HAND_SIZE - this.player.hand.length);
+        const drawCards = this.player.drawCards(HAND_SIZE - this.player.hand.length);
 
         this.cancelDrag();
+
+        const isStartDrawn = drawCards.some(card => card.value === START_CARD)
+
+        if (isStartDrawn) {
+            this.action = PLAY_START_CARD;
+            this.message = PLAY_START_MSG;
+
+            return;
+        }
+
+        this.action = null;
+        this.message = PLAY_MSG;
     }
 } 
