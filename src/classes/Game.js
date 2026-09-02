@@ -9,21 +9,11 @@ export class Game {
         this.canvas = document.querySelector("#game");
         this.ctx = this.canvas.getContext("2d");
 
-        this.canvas.width = GAME_WIDTH;
-        this.canvas.height = GAME_HEIGHT;
-
         this.board = new Board();
         this.player = new Player();
         
         this.layoutGap = UI_MARGIN;
         this.messageHeight = 20;
-
-        this.layout();
-        this.resize();
-
-        window.addEventListener("resize", () => {
-            this.resize();
-        })
 
         this.status = START_GAME;
         this.action = null
@@ -40,6 +30,12 @@ export class Game {
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
 
+        this.resize();
+
+        window.addEventListener("resize", () => {
+            this.resize();
+        })
+
         this.setupInput();
     }
 
@@ -50,7 +46,7 @@ export class Game {
     }
 
     loop() {
-        this.gameLogicUpdate();
+        this.update();
 
         // if (this.status === START_GAME) {
         //     console.log('game start');
@@ -58,7 +54,7 @@ export class Game {
         // } else if (this.status === END_GAME) {
 
         // } else {
-        this.drawGameRender();
+        this.render();
         // 
         // }
 
@@ -78,12 +74,12 @@ export class Game {
         this.layout();
     }
 
-    gameLogicUpdate() {
+    update() {
         // Game logic
         this.player.update();
     }
 
-    drawGameRender() {
+    render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.board.render(this.ctx);
@@ -197,7 +193,7 @@ export class Game {
             y: (e.clientY - rect.top) * scaleY
         };
     }
-    
+
     startDrag(e) {
         const { x, y } = this.getPointerPosition(e);
         const card = this.player.getCardAtPosition(x, y);
@@ -318,18 +314,20 @@ export class Game {
     }
 
     playCard(cell, card) {
-        if (cell.type === START_CARD) {
+        console.log(card.value, cell.type);
+        
+        if (card.value === START_CARD && cell.type === START_CARD) {
             return this.playStartCard(cell, card);
-        } else if (cell.type === FINISH_CARD) {
+        } else if (card.value === FINISH_CARD && cell.type === FINISH_CARD) {
             return this.playFinishCard(cell, card);
-        } else if (cell.type === NUMBER_CARD) {
+        } else if (typeof(card.value) === 'number' && cell.type === NUMBER_CARD) {
             return this.playNCard(cell, card);
         }
-
-        return false;
     }
 
     playStartCard(cell, card) {
+        console.log(cell);
+        
         this.board.placeCard(cell.row, cell.col, card);
         this.player.drawCards(8);
 
@@ -341,6 +339,10 @@ export class Game {
     }
 
     playFinishCard(cell, card) {
+        console.log(cell);
+
+        this.board.isFull();
+        
         // check if board is full
         // if board is full play finish card in finish position
         // show win screen & end game

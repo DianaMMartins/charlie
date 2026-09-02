@@ -1,3 +1,4 @@
+import { FINISH_CARD, START_CARD } from "../enum/cardTypes.";
 import { DECK_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
 import { Card } from "./Card";
 
@@ -19,7 +20,7 @@ export class Deck {
         }
 
         for (let value = 1; value <= 5; value++) {
-            this.cards.push(new Card('Finish'));
+            this.cards.push(new Card(FINISH_CARD));
         }
     }
 
@@ -47,7 +48,7 @@ export class Deck {
         this.topDeck = this.cards.splice(0, half);
         this.bottomDeck = this.cards.splice(0);
 
-        this.topDeck.push(new Card('Start'));
+        this.topDeck.push(new Card(START_CARD));
 
         this.shuffle(this.topDeck);
         

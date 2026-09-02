@@ -249,4 +249,11 @@ export class Board {
 
         return cell;
     }
+
+    isFull() {
+        console.log(this.cells);
+        
+        // this.isStartPlayed;
+        // this.cells;
+    }
 }
