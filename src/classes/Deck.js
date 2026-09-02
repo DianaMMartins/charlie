@@ -1,5 +1,5 @@
 import { FINISH_CARD, START_CARD } from "../enum/cardTypes.";
-import { DECK_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
+import { NUMBER_CARDS, CARD_DIMENSIONS } from "../enum/gameSizes";
 import { Card } from "./Card";
 
 export class Deck {
@@ -8,14 +8,12 @@ export class Deck {
         this.topDeck = [];
         this.bottomDeck = [];
 
-        this.deckSize = DECK_SIZE;
-
         this.create();
         this.shuffle();
     }
 
     create() {
-        for (let value = 1; value <= this.deckSize; value++) {
+        for (let value = 1; value <= NUMBER_CARDS ; value++) {
             this.cards.push(new Card(value));
         }
 

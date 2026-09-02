@@ -36,6 +36,7 @@ export class Player {
         this.selectedCards = [];
 
         this.drawCards(HAND_SIZE);
+        this.deck.finishSetup();
     }
 
     setLayout(gameWidth, gameHeight, y) {
@@ -206,8 +207,6 @@ export class Player {
                 this.hand.push(card);
             }
         }
-
-        this.deck.finishSetup();
     }
 
     discard(card) {

@@ -11,7 +11,7 @@ export class Game {
 
         this.board = new Board();
         this.player = new Player();
-        
+
         this.layoutGap = UI_MARGIN;
         this.messageHeight = 20;
 
@@ -44,6 +44,13 @@ export class Game {
 
         this.loop();
     }
+    
+    selectGamePlay() {
+        this.status = GAME_PLAY;
+        this.action = null;
+        this.discardCount = 0;
+        this.message = PLAY_MSG;
+    }
 
     loop() {
         this.update();
@@ -61,19 +68,6 @@ export class Game {
         requestAnimationFrame(() => this.loop());
     }
 
-    resize() {
-        const screenWidth = window.innerWidth;
-        const height = window.innerHeight;
-
-        this.canvas.width = screenWidth;
-        this.canvas.height = height;
-
-        this.board.resize(screenWidth);
-        this.player.resize(screenWidth);
-
-        this.layout();
-    }
-
     update() {
         // Game logic
         this.player.update();
@@ -87,13 +81,6 @@ export class Game {
         this.player.render(this.ctx, this.draggedCard);
 
         this.renderDraggedCard();
-    }
-
-    selectGamePlay() {
-        this.status = GAME_PLAY;
-        this.action = null;
-        this.discardCount = 0;
-        this.message = PLAY_MSG;
     }
 
     renderMessage() {
@@ -113,22 +100,29 @@ export class Game {
         this.ctx.restore();
     }
 
-    setupInput() {
-        this.canvas.addEventListener("pointerdown", (e) => {
-            this.startDrag(e);
-        });
+    renderDraggedCard() {
+        if (!this.draggedCard) {
+            return;
+        }
 
-        this.canvas.addEventListener("pointermove", (e) => {
-            this.updateDrag(e);
-        });
+        this.draggedCard.render(
+            this.ctx,
+            this.dragX,
+            this.dragY
+        )
+    }
 
-        this.canvas.addEventListener("pointerup", (e) => {
-            this.endDrag(e);
-        });
+    resize() {
+        const screenWidth = window.innerWidth;
+        const height = window.innerHeight;
 
-        this.canvas.addEventListener("pointercancel", () => {
-            this.cancelDrag();
-        });
+        this.canvas.width = screenWidth;
+        this.canvas.height = height;
+
+        this.board.resize(screenWidth);
+        this.player.resize(screenWidth);
+
+        this.layout();
     }
 
     layout() {
@@ -180,6 +174,24 @@ export class Game {
             this.canvas.height,
             playerY
         );
+    }
+
+    setupInput() {
+        this.canvas.addEventListener("pointerdown", (e) => {
+            this.startDrag(e);
+        });
+
+        this.canvas.addEventListener("pointermove", (e) => {
+            this.updateDrag(e);
+        });
+
+        this.canvas.addEventListener("pointerup", (e) => {
+            this.endDrag(e);
+        });
+
+        this.canvas.addEventListener("pointercancel", () => {
+            this.cancelDrag();
+        });
     }
 
     getPointerPosition(e) {
@@ -315,19 +327,19 @@ export class Game {
 
     playCard(cell, card) {
         console.log(card.value, cell.type);
-        
+
         if (card.value === START_CARD && cell.type === START_CARD) {
             return this.playStartCard(cell, card);
         } else if (card.value === FINISH_CARD && cell.type === FINISH_CARD) {
             return this.playFinishCard(cell, card);
-        } else if (typeof(card.value) === 'number' && cell.type === NUMBER_CARD) {
+        } else if (typeof (card.value) === 'number' && cell.type === NUMBER_CARD) {
             return this.playNCard(cell, card);
         }
     }
 
     playStartCard(cell, card) {
         console.log(cell);
-        
+
         this.board.placeCard(cell.row, cell.col, card);
         this.player.drawCards(8);
 
@@ -342,7 +354,7 @@ export class Game {
         console.log(cell);
 
         this.board.isFull();
-        
+
         // check if board is full
         // if board is full play finish card in finish position
         // show win screen & end game
@@ -365,18 +377,6 @@ export class Game {
         return false;
     }
 
-    renderDraggedCard() {
-        if (!this.draggedCard) {
-            return;
-        }
-
-        this.draggedCard.render(
-            this.ctx,
-            this.dragX,
-            this.dragY
-        )
-    }
-
     endTurn() {
         this.action = null;
         this.discardCount = 0;
@@ -387,4 +387,4 @@ export class Game {
 
         this.cancelDrag();
     }
-} 1
+} 
