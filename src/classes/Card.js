@@ -60,7 +60,7 @@ export class Card {
         ctx.fill();
 
         this.renderCardText(ctx, x, y, size);
-        
+
         ctx.restore();
     }
 
@@ -114,4 +114,52 @@ export class Card {
 
         ctx.restore();
     }
+
+    // might not be needed - To confirm when implementing overlay
+    // renderDiscardCards() {
+    //     const ctx = this.ctx;
+
+    //     const columns = 4;
+    //     const cardSize = this.player.cardSize;
+
+    //     const gap = 20;
+
+    //     const totalWidth =
+    //         columns * cardSize +
+    //         (columns - 1) * gap;
+
+    //     const startX =
+    //         (this.canvas.width - totalWidth) / 2;
+
+    //     const startY = 100;
+
+    //     this.discardCardPositions = [];
+
+    //     for (let i = 0; i < this.player.hand.length; i++) {
+    //         const card = this.player.hand[i];
+
+    //         const column = i % columns;
+    //         const row = Math.floor(i / columns);
+
+    //         const x =
+    //             startX +
+    //             column * (cardSize + gap);
+
+    //         const y =
+    //             startY +
+    //             row * (cardSize + gap);
+
+    //         this.discardCardPositions.push({
+    //             card,
+    //             x,
+    //             y
+    //         });
+
+    //         card.render(ctx, x, y, cardSize);
+
+    //         if (this.discardSelection.includes(card)) {
+    //             this.renderSelectedCard(x, y, cardSize);
+    //         }
+    //     }
+    // }
 }

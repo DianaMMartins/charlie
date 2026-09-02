@@ -3,6 +3,7 @@ import { Board } from "./Board";
 import { HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS } from "../enum/gameStatus";
+// import { DiscardOverlay } from "./DiscardOverlay";
 
 export class Game {
     constructor() {
@@ -37,6 +38,8 @@ export class Game {
         })
 
         this.setupInput();
+
+        // this.overlay = new DiscardOverlay(this.player);    
     }
 
     start() {
@@ -255,7 +258,7 @@ export class Game {
 
         const boardCell = this.board.getCellAtPosition(x, y);
 
-        if (boardCell) {
+        if (boardCell && boardCell.card === null) {
             this.dropCardOnBoard(boardCell);
 
             return;
@@ -363,6 +366,10 @@ export class Game {
 
         this.board.placeCard(cell.row, cell.col, card);
         this.player.drawCards(8);
+        
+        // this.overlay.open();
+        // open overlay!
+        // implement improvemets to overlay
 
         this.action = DISCARD_START_CARDS;
 

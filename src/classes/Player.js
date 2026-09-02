@@ -33,8 +33,6 @@ export class Player {
         this.discardSize = DISCARD_DIMENSIONS;
         this.uiMargin = UI_MARGIN;
 
-        this.selectedCards = [];
-
         this.drawCards(HAND_SIZE);
         this.deck.finishSetup();
     }
@@ -223,24 +221,6 @@ export class Player {
 
         this.hand.splice(index, 1);
         this.discardPile.push(card);
-    }
-
-    playSelectedCard(card, row, col) {
-        const index = this.hand.indexOf(card);
-
-        if (index === -1) {
-            return false;
-        }
-
-        const placed = this.board.placeCard(row, col, card);
-
-        if (!placed) {
-            return false;
-        }
-
-        this.hand.splice(index, 1);
-
-        return true;
     }
 
     getCardAtPosition(x, y) {

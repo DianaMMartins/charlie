@@ -49,7 +49,7 @@ export class Deck {
         this.topDeck.push(new Card(START_CARD));
 
         this.shuffle(this.topDeck);
-                
+     
         this.cards = this.topDeck.concat(this.bottomDeck);
     }
 }
