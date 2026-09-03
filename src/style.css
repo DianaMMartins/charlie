@@ -33,12 +33,12 @@ body {
   overflow: hidden;
 }
 
-/* body {
+body {
   background: var(--baby-blue-ice);
-} */
+}
 
 /* to implement */
-body {
+/* body {
   background: linear-gradient(
     40deg,
     var(--powder-blush) 0%,
@@ -50,7 +50,7 @@ body {
     var(--periwinkle) 85%,
     var(--mauve) 100%
   );
-}
+} */
 
 #game-container {
   width: 100vw;

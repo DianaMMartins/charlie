@@ -225,7 +225,6 @@ export class Board {
                     return b.row - a.row;
                 }
 
-
                 return a.col - b.col;
             });
     }
