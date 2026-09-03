@@ -8,6 +8,8 @@ export const DISCARD_CARD = 2;
 export const DRAW_CARDS = 3;
 export const DISCARD_START_CARDS = 4;
 export const REQUIRED_DISCARD = 5;
+export const GAME_WON = 6;
+export const GAME_LOST = 7;
 
 export const PLAY_MSG = 'Play 1 card or Discard 2 cards';
 export const DISCARD_MSG = 'Discard another card';

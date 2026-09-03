@@ -5,16 +5,18 @@ export class EndOverlay extends Overlay {
     constructor() {
         super();
 
+        this.won = false;
         this.onRestart = null;
     }
 
-    open(onRestart) {
+    open(won, onRestart) {
         super.open();
 
+        this.won = won;
         this.onRestart = onRestart;
     }
 
-    render(ctx, width, height, endText = "The End") {
+    render(ctx, width, height) {
         if (!this.active) {
             return;
         }
@@ -30,7 +32,11 @@ export class EndOverlay extends Overlay {
         const titleY = startY + titleHeight / 2;
         const buttonY = startY + titleHeight + gap;
 
-        this.renderTitle(ctx, width, endText, titleY);
+        const title = this.won
+            ? "You Won!"
+            : "You Lost, try again!";
+
+        this.renderTitle(ctx, width, title, titleY);
         this.renderButton(ctx, width, buttonY, 'Play again');
     }
 

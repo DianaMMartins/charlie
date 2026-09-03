@@ -117,12 +117,17 @@ export class DiscardOverlay extends Overlay {
         ctx.strokeStyle = "black";
         ctx.lineWidth = 4;
 
-        ctx.strokeRect(
+        ctx.beginPath();
+
+        ctx.roundRect(
             x - 4,
             y - 4,
             size + 8,
-            size + 8
+            size + 8,
+            8
         );
+
+        ctx.stroke();
 
         ctx.restore();
     }

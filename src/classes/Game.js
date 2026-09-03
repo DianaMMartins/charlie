@@ -2,7 +2,7 @@ import { Player } from "./Player";
 import { Board } from "./Board";
 import { HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
-import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD } from "../enum/gameStatus";
+import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
@@ -66,23 +66,14 @@ export class Game {
 
     selectGamePlay() {
         this.status = GAME_PLAY;
-        this.action = null;
+        this.action = PLAY_CARD;
         this.discardCount = 0;
         this.message = PLAY_MSG;
     }
 
     loop() {
         this.update();
-
-        // if (this.status === START_GAME) {
-        //     console.log('game start');
-
-        // } else if (this.status === END_GAME) {
-
-        // } else {
         this.render();
-        // 
-        // }
 
         requestAnimationFrame(() => this.loop());
     }
@@ -111,6 +102,27 @@ export class Game {
                 this.canvas.height
             );
         }
+    }
+
+    restart() {
+        this.board = new Board();
+        this.player = new Player();
+
+        this.discardOverlay =
+            new DiscardOverlay(this.player);
+
+        this.overlay = null;
+
+        this.discardCount = 0;
+        this.discardRequired = 0;
+
+        this.status = START_GAME;
+        this.action = null;
+        this.message = "";
+
+        this.resize();
+
+        this.openStartOverlay();
     }
 
     renderMessage() {
@@ -294,19 +306,19 @@ export class Game {
 
         const { x, y } = this.getPointerPosition(e);
 
+        const discardArea = this.player.isPointInsideDiscard(x, y);
+
+        if (discardArea) {
+            this.dropCardOnDiscard();
+            return;
+        }
+
         const boardCell = this.board.getCellAtPosition(x, y);
 
         if (boardCell && boardCell.card === null) {
             this.dropCardOnBoard(boardCell);
 
             return;
-        }
-
-        const discardCell = this.player.isPointInsideDiscard(x, y);
-
-        if (discardCell) {
-            this.dropCardOnDiscard();
-            return
         }
 
         this.cancelDrag();
@@ -336,11 +348,6 @@ export class Game {
 
         this.player.removeCard(card);
 
-        if (this.action === PLAY_CARD) {
-            console.log('play card!');
-            // this.playCard(card);
-        }
-
         if (this.action === DISCARD_START_CARDS) {
             this.discardCount = 0;
             this.cancelDrag();
@@ -366,17 +373,30 @@ export class Game {
             return false;
         }
 
+        if (
+            this.action !== PLAY_CARD &&
+            this.action !== DISCARD_CARD &&
+            this.action !== REQUIRED_DISCARD
+        ) {
+            this.cancelDrag();
+            return false;
+        }
+
         this.player.discard(card);
         this.discardCount++;
+
+        if (this.player.hand.length === 0) {
+            this.endGame(false);
+            return true;
+        }
+
         if (this.action === REQUIRED_DISCARD) {
             if (this.discardCount >= this.discardRequired) {
                 this.endTurn();
             } else {
-                const remaining =
-                    this.discardRequired - this.discardCount;
+                const remaining = this.discardRequired - this.discardCount;
 
-                this.message =
-                    `Discard ${remaining} cards`;
+                this.message = `Discard ${remaining} cards`;
 
                 this.cancelDrag();
             }
@@ -384,15 +404,13 @@ export class Game {
             return true;
         }
 
-        if (this.action === DISCARD_CARD) {
-            if (this.discardCount === 2) {
-                this.endTurn();
-            } else {
-                this.message = DISCARD_MSG;
-                this.cancelDrag();
-            }
+        this.action = DISCARD_CARD;
 
-            return true;
+        if (this.discardCount === 2) {
+            this.endTurn();
+        } else {
+            this.message = DISCARD_MSG;
+            this.cancelDrag();
         }
 
         return true;
@@ -453,7 +471,7 @@ export class Game {
 
         if (!this.board.isFull()) {
             this.message = COMPLETE_BOARD_MSG + "\n" + PLAY_MSG;
-           
+
             return false;
         }
 
@@ -500,7 +518,7 @@ export class Game {
 
         for (const adjacentCard of adjacentCards) {
             const difference = this.board.getCardDifference(card, adjacentCard);
-           
+
             if (smallestDif > difference || smallestDif === 0) {
                 smallestDif = difference;
             }
@@ -527,6 +545,11 @@ export class Game {
 
         this.cancelDrag();
 
+        if (this.player.hand.length === 0) {
+            this.endGame(false);
+            return;
+        }
+
         const isStartDrawn = drawCards.some(card => card.value === START_CARD)
 
         if (isStartDrawn) {
@@ -536,7 +559,19 @@ export class Game {
             return;
         }
 
-        this.action = null;
+        this.action = PLAY_CARD;
         this.message = PLAY_MSG;
+    }
+
+    endGame(won) {
+        this.status = won ? GAME_WON : GAME_LOST;
+        this.action = null;
+        this.cancelDrag();
+
+        this.overlay = this.endOverlay;
+
+        this.endOverlay.open(won, () => {
+            this.restart();
+        });
     }
 } 

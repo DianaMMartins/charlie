@@ -36,6 +36,16 @@ export class Overlay {
 
         const borderWidth = DEFAULT_MARGIN;
 
+        ctx.fillStyle = "#f4e0ff";
+
+        ctx.fillRect(
+            borderWidth,
+            borderWidth,
+            width - borderWidth * 2,
+            height - borderWidth * 2
+        );
+
+        
         this.renderRainbowBorder(
             ctx,
             0,
@@ -43,15 +53,6 @@ export class Overlay {
             width,
             height,
             borderWidth
-        );
-
-        ctx.fillStyle = "#000000";
-
-        ctx.fillRect(
-            borderWidth,
-            borderWidth,
-            width - borderWidth * 2,
-            height - borderWidth * 2
         );
 
         ctx.restore();
@@ -109,7 +110,7 @@ export class Overlay {
 
         ctx.save();
 
-        ctx.fillStyle = enabled ? "white" : "gray";
+        ctx.fillStyle = enabled ? "black" : "gray";
 
         ctx.beginPath();
 
@@ -123,7 +124,7 @@ export class Overlay {
 
         ctx.fill();
 
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "white";
         ctx.font = "20px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
