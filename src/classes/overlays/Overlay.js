@@ -41,13 +41,13 @@ export class Overlay {
         ctx.restore();
     }
 
-    renderButton(ctx, width, height, text, enabled = true) {
+    renderButton(ctx, width, y, text, enabled = true) {
         const buttonWidth = 180;
         const buttonHeight = 50;
 
         this.button = {
             x: (width - buttonWidth) / 2,
-            y: height - 90,
+            y: y,
             width: buttonWidth,
             height: buttonHeight
         };
@@ -77,12 +77,15 @@ export class Overlay {
         ctx.restore();
     }
 
-    renderTitle(ctx, width, text) {
+    getCenteredY(height, contentHeight) {
+        return (height - contentHeight) / 2;
+    }
+
+    renderTitle(ctx, width, text, y) {
         ctx.save();
 
         const x = width / 2;
-        const y = 150;
-
+        
         const gradient = ctx.createLinearGradient(
             x - 120,
             y,

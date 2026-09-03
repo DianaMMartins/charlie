@@ -1,3 +1,4 @@
+import { BUTTON_H, DEFAULT_MARGIN, UI_MARGIN } from "../../enum/gameSizes";
 import { Overlay } from "./Overlay";
 
 export class DiscardOverlay extends Overlay {
@@ -39,16 +40,32 @@ export class DiscardOverlay extends Overlay {
 
         super.render(ctx, width, height);
 
+        const titleHeight = DEFAULT_MARGIN;
+        const gap = UI_MARGIN;
+        const buttonHeight = BUTTON_H;
+
+        const rows = Math.ceil(this.player.hand.length / this.columns);
+        const cardsHeight = rows * this.player.cardSize + (rows - 1) * this.gap;
+
+        const totalHeight = titleHeight + gap + cardsHeight + gap + buttonHeight;
+        const startY = this.getCenteredY(height,totalHeight);
+
+        const titleY = startY + titleHeight / 2;
+        const cardsY = startY + titleHeight + gap;
+        const buttonY = cardsY + cardsHeight + gap;
+
+
         this.renderTitle(
             ctx,
             width,
-            "Select 8 cards to discard"
-        );        
-        this.renderCards(ctx, width);
-        this.renderButton(ctx, width, height);
+            "Select 8 cards to discard",
+            titleY
+        );
+        this.renderCards(ctx, width, cardsY);
+        this.renderButton(ctx, width, buttonY, "Disacrd", this.selectedCards.length === 8);
     }
 
-    renderCards(ctx, width) {
+    renderCards(ctx, width, startY) {
         const cardSize = this.player.cardSize;
 
         const totalWidth =
@@ -57,8 +74,6 @@ export class DiscardOverlay extends Overlay {
 
         const startX =
             (width - totalWidth) / 2;
-
-        const startY = 100;
 
         this.cardPositions = [];
 
@@ -110,16 +125,6 @@ export class DiscardOverlay extends Overlay {
         );
 
         ctx.restore();
-    }
-
-    renderButton(ctx, width, height) {
-        super.renderButton(
-            ctx,
-            width,
-            height,
-            "Discard",
-            this.selectedCards.length === 8
-        );
     }
 
     toggleCard(card) {

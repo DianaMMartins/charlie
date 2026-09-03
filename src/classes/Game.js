@@ -6,7 +6,6 @@ import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, 
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
-// import { DiscardOverlay } from "./DiscardOverlay";
 
 export class Game {
     constructor() {
