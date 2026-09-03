@@ -13,16 +13,17 @@ export class DiscardOverlay extends Overlay {
         this.columns = 4;
         this.gap = 20;
 
-        this.button = null;
+        this.onDiscard = null;
     }
 
-    open() {
+    open(onDiscard) {
+        super.open();
+
         this.cards = this.player.hand;
         this.selectedCards = [];
         this.cardPositions = [];
 
-        console.log(this.cards);
-        
+        this.onDiscard = onDiscard;
     }
 
     close() {
@@ -148,7 +149,7 @@ export class DiscardOverlay extends Overlay {
         this.selectedCards.push(card);
     }
 
-     handleClick(x, y) {
+    handleClick(x, y) {
         for (const item of this.cardPositions) {
             if (
                 x >= item.x &&
@@ -157,14 +158,24 @@ export class DiscardOverlay extends Overlay {
                 y <= item.y + this.player.cardSize
             ) {
                 this.toggleCard(item.card);
-                return false;
+                return true;
             }
         }
 
         if (this.isButtonClicked(x, y)) {
-            return this.selectedCards.length === 8;
+            if (this.selectedCards.length !== 8) {
+                return true;
+            }
+
+            if (this.onDiscard) {
+                this.onDiscard(this.selectedCards);
+            }
+
+            this.close();
+
+            return true;
         }
 
-        return false;
+        return true;
     }
 }

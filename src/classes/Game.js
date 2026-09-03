@@ -3,6 +3,9 @@ import { Board } from "./Board";
 import { HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS } from "../enum/gameStatus";
+import { StartOverlay } from "./overlays/StartOverlay";
+import { DiscardOverlay } from "./overlays/DiscardOverlay";
+import { EndOverlay } from "./overlays/EndOverlay";
 // import { DiscardOverlay } from "./DiscardOverlay";
 
 export class Game {
@@ -12,6 +15,12 @@ export class Game {
 
         this.board = new Board();
         this.player = new Player();
+
+        this.startOverlay = new StartOverlay();
+        this.discardOverlay = new DiscardOverlay();
+        this.endOverlay = new EndOverlay();
+
+        this.overlay = null;
 
         this.layoutGap = UI_MARGIN;
         this.messageHeight = 20;
@@ -38,14 +47,21 @@ export class Game {
         })
 
         this.setupInput();
-
-        // this.overlay = new DiscardOverlay(this.player);    
     }
 
     start() {
-        this.selectGamePlay();
+        this.openStartOverlay();
 
         this.loop();
+    }
+
+    openStartOverlay() {
+        this.overlay = this.startOverlay;
+
+        this.startOverlay.open(() => {
+            this.selectGamePlay();
+            this.overlay = null;
+        });
     }
 
     selectGamePlay() {
@@ -84,6 +100,14 @@ export class Game {
         this.player.render(this.ctx, this.draggedCard);
 
         this.renderDraggedCard();
+
+        if (this.overlay) {
+            this.overlay.render(
+                this.ctx,
+                this.canvas.width,
+                this.canvas.height
+            );
+        }
     }
 
     renderMessage() {
@@ -187,20 +211,31 @@ export class Game {
 
     setupInput() {
         this.canvas.addEventListener("pointerdown", (e) => {
+            const { x, y } = this.getPointerPosition(e);
+
+            if (this.overlay) {
+                this.overlay.handleClick(x, y);
+                return;
+            }
+
             this.startDrag(e);
         });
 
-        this.canvas.addEventListener("pointermove", (e) => {
-            this.updateDrag(e);
-        });
+        if (!this.overlay) {
+            this.canvas.addEventListener("pointermove", (e) => {
 
-        this.canvas.addEventListener("pointerup", (e) => {
-            this.endDrag(e);
-        });
+                this.updateDrag(e);
+            });
 
-        this.canvas.addEventListener("pointercancel", () => {
-            this.cancelDrag();
-        });
+            this.canvas.addEventListener("pointerup", (e) => {
+
+                this.endDrag(e);
+            });
+
+            this.canvas.addEventListener("pointercancel", () => {
+                this.cancelDrag();
+            });
+        }
     }
 
     getPointerPosition(e) {
@@ -371,7 +406,7 @@ export class Game {
 
         this.board.placeCard(cell.row, cell.col, card);
         this.player.drawCards(8);
-        
+
         // this.overlay.open();
         // open overlay!
         // implement improvemets to overlay

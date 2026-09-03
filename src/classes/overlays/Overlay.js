@@ -1,10 +1,8 @@
-import { UI_MARGIN } from "../enum/gameSizes";
+import { UI_MARGIN } from "../../enum/gameSizes";
 
 export class Overlay {
     constructor() {
-        this.type = null;
         this.active = false;
-
         this.button = null;
     }
 
@@ -13,7 +11,6 @@ export class Overlay {
     }
 
     close() {
-        this.type = null;
         this.active = false;
     }
 
@@ -28,7 +25,7 @@ export class Overlay {
     renderBackground(ctx, width, height) {
         ctx.save();
 
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillStyle = "black";
         ctx.fillRect(0, 0, width, height);
 
         const padding = UI_MARGIN;
@@ -44,7 +41,7 @@ export class Overlay {
         ctx.restore();
     }
 
-   renderButton(ctx, width, height, text, enabled = true) {
+    renderButton(ctx, width, height, text, enabled = true) {
         const buttonWidth = 180;
         const buttonHeight = 50;
 
@@ -78,5 +75,54 @@ export class Overlay {
         );
 
         ctx.restore();
+    }
+
+    renderTitle(ctx, width, text) {
+        ctx.save();
+
+        const x = width / 2;
+        const y = 150;
+
+        const gradient = ctx.createLinearGradient(
+            x - 120,
+            y,
+            x + 120,
+            y
+        );
+
+        gradient.addColorStop(0.00, "#ff5c5c");
+        gradient.addColorStop(0.14, "#ff9f43");
+        gradient.addColorStop(0.28, "#f6d743");
+        gradient.addColorStop(0.42, "#4cd964");
+        gradient.addColorStop(0.56, "#22d3ee");
+        gradient.addColorStop(0.70, "#5b8def");
+        gradient.addColorStop(0.84, "#8b6cff");
+        gradient.addColorStop(1.00, "#ff69d4");
+
+        ctx.fillStyle = gradient;
+        ctx.font = "32px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(text, x, y);
+
+        ctx.restore();
+    }
+
+    isButtonClicked(x, y) {
+        if (!this.button) {
+            return false;
+        }
+
+        return (
+            x >= this.button.x &&
+            x <= this.button.x + this.button.width &&
+            y >= this.button.y &&
+            y <= this.button.y + this.button.height
+        )
+    }
+
+    handleClick(x, y) {
+        return false;
     }
 }
