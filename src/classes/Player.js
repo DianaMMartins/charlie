@@ -96,15 +96,11 @@ export class Player {
     }
 
     renderHandCardPosition(index) {
-        const handWidth = this.getHandWidth();
-        const startX = (this.width - handWidth) / 2;
-
         return {
-            x: startX + index * (this.cardSize + this.cardGap),
+            x: this.handX + index * (this.cardSize + this.cardGap),
             y: this.handY
         };
     }
-
     renderHand(ctx, draggedCard) {
         for (let i = 0; i < this.hand.length; i++) {
             const card = this.hand[i];
@@ -211,49 +207,7 @@ export class Player {
 
         return drawnCards;
     }
-
-    discard(card) {
-        const index = this.hand.indexOf(card);
-
-        if (index === -1) {
-            return;
-        }
-
-        this.hand.splice(index, 1);
-        this.discardPile.push(card);
-    }
-
-    getCardAtPosition(x, y) {
-        for (let i = 0; i < this.hand.length; i++) {
-            const { x: cardX, y: cardY } = this.renderHandCardPosition(i);
-
-            if (this.isPointInsideCard(x, y, cardX, cardY)) {
-                return this.hand[i];
-            }
-        }
-
-        return null;
-    }
-
-    isPointInsideCard(x, y, cardX, cardY, size = this.cardSize) {
-        return (
-            x >= cardX &&
-            x <= cardX + size &&
-            y >= cardY &&
-            y <= cardY + size
-        )
-    }
-
-    isPointInsideDiscard(x, y) {
-        return this.isPointInsideCard(
-            x,
-            y,
-            this.discardX,
-            this.discardY,
-            this.discardSize
-        );
-    }
-
+    
     removeCard(card) {
         const index = this.hand.indexOf(card);
 
@@ -264,5 +218,41 @@ export class Player {
         this.hand.splice(index, 1);
 
         return true;
+    }
+
+    discard(card) {
+        this.removeCard(card);
+        this.discardPile.push(card);
+    }
+
+    getCardAtPosition(x, y) {
+        for (let i = 0; i < this.hand.length; i++) {
+            const { x: cardX, y: cardY } = this.renderHandCardPosition(i);
+
+            if (this.isPointInside(x, y, cardX, cardY)) {
+                return this.hand[i];
+            }
+        }
+
+        return null;
+    }
+
+    isPointInside(x, y, cardX, cardY, size = this.cardSize) {
+        return (
+            x >= cardX &&
+            x <= cardX + size &&
+            y >= cardY &&
+            y <= cardY + size
+        )
+    }
+
+    isPointInsideDiscard(x, y) {
+        return this.isPointInside(
+            x,
+            y,
+            this.discardX,
+            this.discardY,
+            this.discardSize
+        );
     }
 }

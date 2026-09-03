@@ -1,5 +1,8 @@
-import charlieImage from "../assets/charlie.png"; //update to svg no issue
+import charlie from "../assets/charlie.svg";
+import stars from "../assets/stars.svg";
 
 export const CARD_BACK_IMAGE = new Image();
+export const CARD_FRONT_IMAGE = new Image();
 
-CARD_BACK_IMAGE.src = charlieImage;
+CARD_BACK_IMAGE.src = stars;
+CARD_FRONT_IMAGE.src = charlie;

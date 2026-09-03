@@ -231,21 +231,11 @@ export class Board {
     }
 
     getCellAtPosition(x, y) {
-        const col = Math.floor(
-            (x - this.x) / this.cellSize
-        );
-
-        const row = Math.floor(
-            (y - this.y) / this.cellSize
-        );
-
+        const col = Math.floor((x - this.x) / this.cellSize);
+        const row = Math.floor((y - this.y) / this.cellSize);
         const cell = this.getCell(row, col);
 
-        if (!cell || cell.type === null) {
-            return null;
-        }
-
-        return cell;
+        return cell?.type ? cell : null;
     }
 
     isFull() {

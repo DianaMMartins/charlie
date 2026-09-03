@@ -19,7 +19,7 @@ module.exports = {
                 type: "javascript/auto",
             },
             {
-                test: /\.(png|jpg|jpeg|gif)$/i,
+                test: /\.(svg)$/i,
                 type: "asset/resource",
             },
         ],

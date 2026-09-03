@@ -1,5 +1,5 @@
 import { BOARD_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
-import { CARD_BACK_IMAGE } from "../assets";
+import { CARD_BACK_IMAGE, CARD_FRONT_IMAGE } from "../assets";
 
 export class Card {
     constructor(value) {
@@ -32,6 +32,16 @@ export class Card {
         ctx.roundRect(x, y, size, size, BOARD_SIZE);
         ctx.clip();
 
+        const gradient = ctx.createLinearGradient(
+            x,
+            y,
+            x + size,
+            y
+        );
+
+        ctx.fillStyle = "black";
+        ctx.fillRect(x, y, size, size);
+
         ctx.drawImage(
             CARD_BACK_IMAGE,
             x,
@@ -47,36 +57,74 @@ export class Card {
         ctx.save();
 
         ctx.beginPath();
+        ctx.roundRect(x, y, size, size, BOARD_SIZE);
 
-        ctx.roundRect(
-            x,
-            y,
-            size,
-            size,
-            BOARD_SIZE
-        );
-
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "black";
         ctx.fill();
 
-        this.renderCardText(ctx, x, y, size);
+        const padding = size * 0.08;
+        const imageSize = size - padding * 2;
+        const imageX = x + (size - imageSize) / 2;
+        const imageY = y + (size - imageSize) / 2;
+
+        ctx.drawImage(
+            CARD_FRONT_IMAGE,
+            imageX,
+            imageY,
+            imageSize,
+            imageSize
+        );
+
+        const textPadding = size * 0.05;
+
+        this.renderCardText(
+            ctx,
+            this.value,
+            x + size - textPadding,
+            y + textPadding,
+            {
+                rainbow: true
+            }
+        );
 
         ctx.restore();
     }
 
-    renderCardText(ctx, x, y, size) {
+    renderCardText(ctx, text, x, y, {
+        font = "20px sans-serif",
+        align = "right",
+        baseline = "top",
+        rainbow = false
+    } = {}) {
         ctx.save();
 
-        ctx.font = "20px sans-serif";
-        ctx.fillStyle = "black";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = baseline;
 
-        ctx.fillText(
-            this.value,
-            x + size / 2,
-            y + size / 2
-        );
+        if (rainbow) {
+            const gradient = ctx.createLinearGradient(
+                x - 40,
+                y,
+                x,
+                y
+            );
+
+            gradient.addColorStop(0.00, "#ff5c5c");
+            gradient.addColorStop(0.14, "#ff9f43");
+            gradient.addColorStop(0.28, "#f6d743");
+            gradient.addColorStop(0.42, "#4cd964");
+            gradient.addColorStop(0.56, "#22d3ee");
+            gradient.addColorStop(0.70, "#5b8def");
+            gradient.addColorStop(0.84, "#8b6cff");
+            gradient.addColorStop(1.00, "#ff69d4");
+
+            ctx.fillStyle = gradient;
+        } else {
+            ctx.fillStyle = "black";
+        }
+
+        ctx.fillText(text, x, y);
 
         ctx.restore();
     }

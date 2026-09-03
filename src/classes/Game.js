@@ -280,6 +280,11 @@ export class Game {
     }
 
     dropCardOnBoard(cell) {
+        if (this.action === DISCARD_CARD) {
+            this.cancelDrag();
+            return;
+        }
+
         const card = this.draggedCard;
 
         if (!card) {
@@ -312,6 +317,8 @@ export class Game {
 
         this.player.discard(card);
         this.discardCount++;
+
+        console.log(this.action);
 
         if (this.action === DISCARD_START_CARDS) {
             if (this.discardCount === 8) {

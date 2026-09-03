@@ -25,18 +25,6 @@
   --bright-mauve: #f78ef0;
 } */
 
-/* Bright rainbow */
-/* :root {
-  --powder-blush-dark: #fb7b77;
-  --apricot-cream-dark: #fdc170;
-  --lemon-chiffon-dark: #f3f87f;
-  --tea-green-dark: #98f786;
-  --soft-cyan-dark: #69ebfc;
-  --baby-blue-ice-dark: #6d9efc;
-  --periwinkle-dark: #937df8;
-  --mauve-dark: #f78ef0;
-} */
-
 html,
 body {
   margin: 0;
@@ -45,12 +33,12 @@ body {
   overflow: hidden;
 }
 
-body {
+/* body {
   background: var(--baby-blue-ice);
-}
+} */
 
 /* to implement */
-/* body {
+body {
   background: linear-gradient(
     40deg,
     var(--powder-blush) 0%,
@@ -62,7 +50,7 @@ body {
     var(--periwinkle) 85%,
     var(--mauve) 100%
   );
-} */
+}
 
 #game-container {
   width: 100vw;
