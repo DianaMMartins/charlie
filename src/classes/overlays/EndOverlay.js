@@ -10,7 +10,7 @@ export class EndOverlay extends Overlay {
     open(onRestart) {
         super.open();
 
-        this.onStart = onRestart;
+        this.onRestart = onRestart;
     }
 
     render(ctx, width, height, endText = "The End") {

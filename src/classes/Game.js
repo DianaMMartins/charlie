@@ -17,7 +17,7 @@ export class Game {
         this.player = new Player();
 
         this.startOverlay = new StartOverlay();
-        this.discardOverlay = new DiscardOverlay();
+        this.discardOverlay = new DiscardOverlay(this.player);
         this.endOverlay = new EndOverlay();
 
         this.overlay = null;
@@ -333,6 +333,11 @@ export class Game {
 
         this.player.removeCard(card);
 
+        if (this.action === PLAY_CARD) {
+            console.log('play card!');
+            // this.playCard(card);
+        }
+
         if (this.action === DISCARD_START_CARDS) {
             this.discardCount = 0;
             this.cancelDrag();
@@ -352,20 +357,6 @@ export class Game {
 
         this.player.discard(card);
         this.discardCount++;
-
-        if (this.action === DISCARD_START_CARDS) {
-            if (this.discardCount === 8) {
-                this.endTurn();
-            } else {
-                const cardsLeft = 8 - this.discardCount;
-
-                this.message = `Discard ${cardsLeft} card${cardsLeft > 1 ? 's' : ''}`;
-
-                this.cancelDrag();
-            }
-
-            return;
-        }
 
         this.action = DISCARD_CARD;
 
@@ -407,13 +398,25 @@ export class Game {
         this.board.placeCard(cell.row, cell.col, card);
         this.player.drawCards(8);
 
-        // this.overlay.open();
-        // open overlay!
-        // implement improvemets to overlay
-
         this.action = DISCARD_START_CARDS;
 
+        this.openDiscardOverlay();
+
         return true;
+    }
+
+    openDiscardOverlay() {
+        this.overlay = this.discardOverlay;
+
+        this.discardOverlay.open((selectedCards) => {
+            for (const card of selectedCards) {
+                this.player.discard(card);
+            }
+
+            this.endTurn();
+
+            this.overlay = null;
+        });
     }
 
     playFinishCard(cell, card) {
@@ -430,18 +433,16 @@ export class Game {
 
         this.board.placeCard(cell.row, cell.col, card);
 
-        // check if board is full
-        // if board is full play finish card in finish position
         // show win screen & end game
         return true;
     }
 
     playNCard(cell, card) {
-        // if played next to another card 
-        // discard cards with value difference (payCardToll)
         if (cell.type !== NUMBER_CARD) {
             return false;
         }
+
+        this.action = PLAY_CARD;
 
         if (!this.board.validatePlayedCard(cell, card)) {
             return false;

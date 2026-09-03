@@ -39,25 +39,13 @@ export class DiscardOverlay extends Overlay {
 
         super.render(ctx, width, height);
 
-        this.renderTitle(ctx, width);
+        this.renderTitle(
+            ctx,
+            width,
+            "Select 8 cards to discard"
+        );        
         this.renderCards(ctx, width);
         this.renderButton(ctx, width, height);
-    }
-
-    renderTitle(ctx, width) {
-        ctx.save();
-
-        ctx.fillStyle = 'black';
-        ctx.font = '24px sans-serif';
-        ctx.textAlign = 'center';
-
-        ctx.fillText(
-            `Select 8 cards to discard`,
-            width / 2,
-            70
-        );
-
-        ctx.restore();
     }
 
     renderCards(ctx, width) {
