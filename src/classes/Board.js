@@ -240,4 +240,28 @@ export class Board {
     isFull() {
         return this.getPlayableCells().every(cell => cell.card !== null);
     }
+
+    getCardDifference(cardA, cardB) {     
+        return Math.abs(cardA.value - cardB.value);
+    }
+
+    getAdjacentCards(cell) {
+        const playableCells = this.getPlayableCells();
+        const index = playableCells.indexOf(cell);
+
+        const cards = [];
+
+        const before = playableCells[index - 1];
+        const after = playableCells[index + 1];
+
+        if (before?.card) {
+            cards.push(before.card);
+        }
+
+        if (after?.card) {
+            cards.push(after.card);
+        }
+
+        return cards;
+    }
 }

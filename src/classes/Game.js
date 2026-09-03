@@ -2,7 +2,7 @@ import { Player } from "./Player";
 import { Board } from "./Board";
 import { HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
-import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS } from "../enum/gameStatus";
+import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
@@ -28,6 +28,7 @@ export class Game {
         this.action = null
 
         this.discardCount = 0;
+        this.discardRequired = 0;
         this.message = "";
 
         this.draggedCard = null;
@@ -314,7 +315,7 @@ export class Game {
     }
 
     dropCardOnBoard(cell) {
-        if (this.action === DISCARD_CARD) {
+        if (this.action === DISCARD_CARD || this.action === REQUIRED_DISCARD) {
             this.cancelDrag();
             return;
         }
@@ -344,6 +345,14 @@ export class Game {
             return;
         }
 
+        if (this.discardRequired > 0) {
+            this.message = `Discard ${this.discardRequired} cards`;
+            this.action = REQUIRED_DISCARD;
+            this.cancelDrag();
+
+            return;
+        }
+
         this.endTurn();
     }
 
@@ -356,15 +365,31 @@ export class Game {
 
         this.player.discard(card);
         this.discardCount++;
+        if (this.action === REQUIRED_DISCARD) {
+            if (this.discardCount >= this.discardRequired) {
+                this.endTurn();
+            } else {
+                const remaining =
+                    this.discardRequired - this.discardCount;
 
-        this.action = DISCARD_CARD;
+                this.message =
+                    `Discard ${remaining} cards`;
 
-        if (this.discardCount === 2) {
-            this.endTurn();
-        } else {
-            this.message = DISCARD_MSG;
+                this.cancelDrag();
+            }
 
-            this.cancelDrag();
+            return true;
+        }
+
+        if (this.action === DISCARD_CARD) {
+            if (this.discardCount === 2) {
+                this.endTurn();
+            } else {
+                this.message = DISCARD_MSG;
+                this.cancelDrag();
+            }
+
+            return true;
         }
 
         return true;
@@ -441,19 +466,60 @@ export class Game {
             return false;
         }
 
-        this.action = PLAY_CARD;
-
         if (!this.board.validatePlayedCard(cell, card)) {
+            return false;
+        }
+
+        const adjacentCards = this.board.getAdjacentCards(cell);
+        const discardRequired = this.getDiscardRequired(card, adjacentCards);
+
+        if (discardRequired === false) {
             return false;
         }
 
         this.board.placeCard(cell.row, cell.col, card);
 
+        this.discardRequired = discardRequired;
+        this.discardCount = 0;
+
+        if (discardRequired > 0) {
+            this.action = REQUIRED_DISCARD;
+            this.message = `Discard ${discardRequired} cards`;
+        } else {
+            this.action = PLAY_CARD;
+        }
+
         return true;
+    }
+
+    getDiscardRequired(card, adjacentCards) {
+        let discardRequired = 0;
+        let smallestDif = 0;
+
+        for (const adjacentCard of adjacentCards) {
+            const difference = this.board.getCardDifference(card, adjacentCard);
+           
+            if (smallestDif > difference || smallestDif === 0) {
+                smallestDif = difference;
+            }
+
+        }
+
+        if (smallestDif > 4) {
+            return false;
+        }
+
+        discardRequired = Math.max(
+            discardRequired,
+            smallestDif
+        );
+
+        return discardRequired;
     }
 
     endTurn() {
         this.discardCount = 0;
+        this.discardRequired = 0;
 
         const drawCards = this.player.drawCards(HAND_SIZE - this.player.hand.length);
 
