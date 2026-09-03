@@ -88,7 +88,10 @@ export class Game {
     }
 
     update() {
-        // Game logic
+        if (this.overlay) {
+            this.overlay.update();
+        }
+
         this.player.update();
     }
 
@@ -450,8 +453,7 @@ export class Game {
 
         if (!this.board.isFull()) {
             this.message = COMPLETE_BOARD_MSG + "\n" + PLAY_MSG;
-            // show win screen
-
+           
             return false;
         }
 

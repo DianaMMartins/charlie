@@ -1,9 +1,10 @@
-import { UI_MARGIN } from "../../enum/gameSizes";
+import { DEFAULT_MARGIN, BOARD_SIZE } from "../../enum/gameSizes";
 
 export class Overlay {
     constructor() {
         this.active = false;
         this.button = null;
+        this.gradientAngle = 0;
     }
 
     open() {
@@ -12,6 +13,14 @@ export class Overlay {
 
     close() {
         this.active = false;
+    }
+
+    update() {
+        if (!this.active) {
+            return;
+        }
+
+        this.gradientAngle += 0.006;
     }
 
     render(ctx, width, height) {
@@ -25,18 +34,64 @@ export class Overlay {
     renderBackground(ctx, width, height) {
         ctx.save();
 
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, width, height);
+        const borderWidth = DEFAULT_MARGIN;
 
-        const padding = UI_MARGIN;
-
-        ctx.fillStyle = "white";
-        ctx.fillRect(
-            padding,
-            padding,
-            width - padding * 2,
-            height - padding * 2
+        this.renderRainbowBorder(
+            ctx,
+            0,
+            0,
+            width,
+            height,
+            borderWidth
         );
+
+        ctx.fillStyle = "#000000";
+
+        ctx.fillRect(
+            borderWidth,
+            borderWidth,
+            width - borderWidth * 2,
+            height - borderWidth * 2
+        );
+
+        ctx.restore();
+    }
+
+    renderRainbowBorder(ctx, x, y, width, height, borderWidth) {
+        ctx.save();
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        const gradient = ctx.createConicGradient(
+            this.gradientAngle,
+            centerX,
+            centerY
+        );
+
+        gradient.addColorStop(0.00, "#ff5c5c");
+        gradient.addColorStop(0.14, "#ff9f43");
+        gradient.addColorStop(0.28, "#f6d743");
+        gradient.addColorStop(0.42, "#4cd964");
+        gradient.addColorStop(0.56, "#22d3ee");
+        gradient.addColorStop(0.70, "#5b8def");
+        gradient.addColorStop(0.84, "#8b6cff");
+        gradient.addColorStop(0.96, "#ff69d4");
+        gradient.addColorStop(1.00, "#ff5c5c");
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = borderWidth;
+
+        ctx.beginPath();
+
+        ctx.roundRect(
+            borderWidth / 2,
+            borderWidth / 2,
+            width - borderWidth,
+            height - borderWidth,
+        );
+
+        ctx.stroke();
 
         ctx.restore();
     }
@@ -54,16 +109,21 @@ export class Overlay {
 
         ctx.save();
 
-        ctx.fillStyle = enabled ? "black" : "gray";
+        ctx.fillStyle = enabled ? "white" : "gray";
 
-        ctx.fillRect(
+        ctx.beginPath();
+
+        ctx.roundRect(
             this.button.x,
             this.button.y,
             this.button.width,
-            this.button.height
+            this.button.height,
+            BOARD_SIZE
         );
 
-        ctx.fillStyle = "white";
+        ctx.fill();
+
+        ctx.fillStyle = "black";
         ctx.font = "20px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -85,7 +145,6 @@ export class Overlay {
         ctx.save();
 
         const x = width / 2;
-        
         const gradient = ctx.createLinearGradient(
             x - 120,
             y,
@@ -103,7 +162,7 @@ export class Overlay {
         gradient.addColorStop(1.00, "#ff69d4");
 
         ctx.fillStyle = gradient;
-        ctx.font = "32px sans-serif";
+        ctx.font = "42px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 

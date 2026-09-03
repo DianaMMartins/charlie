@@ -139,12 +139,14 @@ export class Card {
             y + size
         );
 
-        gradient.addColorStop(0, "red");
-        gradient.addColorStop(0.2, "orange");
-        gradient.addColorStop(0.4, "yellow");
-        gradient.addColorStop(0.6, "green");
-        gradient.addColorStop(0.8, "blue");
-        gradient.addColorStop(1, "violet");
+        gradient.addColorStop(0.00, "#ff5c5c");
+        gradient.addColorStop(0.14, "#ff9f43");
+        gradient.addColorStop(0.28, "#f6d743");
+        gradient.addColorStop(0.42, "#4cd964");
+        gradient.addColorStop(0.56, "#22d3ee");
+        gradient.addColorStop(0.70, "#5b8def");
+        gradient.addColorStop(0.84, "#8b6cff");
+        gradient.addColorStop(1.00, "#ff69d4");
 
         ctx.beginPath();
 
@@ -162,52 +164,4 @@ export class Card {
 
         ctx.restore();
     }
-
-    // might not be needed - To confirm when implementing overlay
-    // renderDiscardCards() {
-    //     const ctx = this.ctx;
-
-    //     const columns = 4;
-    //     const cardSize = this.player.cardSize;
-
-    //     const gap = 20;
-
-    //     const totalWidth =
-    //         columns * cardSize +
-    //         (columns - 1) * gap;
-
-    //     const startX =
-    //         (this.canvas.width - totalWidth) / 2;
-
-    //     const startY = 100;
-
-    //     this.discardCardPositions = [];
-
-    //     for (let i = 0; i < this.player.hand.length; i++) {
-    //         const card = this.player.hand[i];
-
-    //         const column = i % columns;
-    //         const row = Math.floor(i / columns);
-
-    //         const x =
-    //             startX +
-    //             column * (cardSize + gap);
-
-    //         const y =
-    //             startY +
-    //             row * (cardSize + gap);
-
-    //         this.discardCardPositions.push({
-    //             card,
-    //             x,
-    //             y
-    //         });
-
-    //         card.render(ctx, x, y, cardSize);
-
-    //         if (this.discardSelection.includes(card)) {
-    //             this.renderSelectedCard(x, y, cardSize);
-    //         }
-    //     }
-    // }
 }
