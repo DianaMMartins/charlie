@@ -40,6 +40,11 @@ export class InputController {
     startDrag(e) {
         const { x, y } = this.getPointerPosition(e);
 
+        if (this.game.isShowDiscardClicked(x, y)) {
+            this.game.discardOverlay.show();
+            return;
+        }
+
         if (this.game.overlay) {
             this.game.overlay.handleClick(x, y);
             return;
@@ -68,9 +73,7 @@ export class InputController {
     }
 
     updateDrag(e) {
-        if (!this.dragging) {
-            return;
-        }
+        if (!this.dragging) return;
 
         const { x, y } = this.getPointerPosition(e);
 
@@ -79,23 +82,29 @@ export class InputController {
 
         const boardCell = this.game.board.getCellAtPosition(x, y);
 
-        if (!boardCell || boardCell.card) {
-            this.game.board.clearHoveredCell();
-            return;
-        }
-
-        const isSpecialCell =
-            this.draggedCard.value === START_CARD
-            || this.draggedCard.value === FINISH_CARD;
-
-        const valid =
-            !isSpecialCell &&
-            this.game.board.validatePlayedCard(
+        if (boardCell) {
+            const valid = this.game.canDropCard(
                 boardCell,
                 this.draggedCard
             );
 
-        this.game.board.setHoveredCell(boardCell, valid);
+            this.game.board.setHoveredCell(
+                boardCell,
+                valid
+            );
+
+            this.game.player.clearDiscardHover();
+
+            return;
+        }
+
+        this.game.board.clearHoveredCell();
+
+        if (this.game.player.isPointInsideDiscard(x, y)) {
+            this.game.player.setDiscardHovered(true);
+        } else {
+            this.game.player.setDiscardHovered(false);
+        }
     }
 
     endDrag(e) {
@@ -132,5 +141,6 @@ export class InputController {
         this.dragging = false;
 
         this.game.board.clearHoveredCell();
+        this.game.player.clearDiscardHover();
     }
 }

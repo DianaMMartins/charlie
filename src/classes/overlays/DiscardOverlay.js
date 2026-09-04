@@ -1,4 +1,4 @@
-import { BUTTON_H, DEFAULT_MARGIN, UI_MARGIN } from "../../enum/gameSizes";
+import { BUTTON_H, BUTTON_WIDTH, DEFAULT_MARGIN, UI_MARGIN } from "../../enum/gameSizes";
 import { isPointInsideRect } from "../../utils/geometry";
 import { Overlay } from "./Overlay";
 
@@ -7,6 +7,8 @@ export class DiscardOverlay extends Overlay {
         super();
 
         this.player = player;
+
+        this.visible = false
 
         this.cards = [];
         this.selectedCards = [];
@@ -21,6 +23,8 @@ export class DiscardOverlay extends Overlay {
     open(onDiscard) {
         super.open();
 
+        this.visible = true;
+
         this.cards = this.player.hand;
         this.selectedCards = [];
         this.cardPositions = [];
@@ -31,11 +35,12 @@ export class DiscardOverlay extends Overlay {
     close() {
         super.close();
 
+        this.visible = false;
         this.selectedCards = [];
     }
 
     render(ctx, width, height) {
-        if (!this.active) {
+        if (!this.active || !this.visible) {
             return;
         }
 
@@ -63,7 +68,14 @@ export class DiscardOverlay extends Overlay {
             titleY
         );
         this.renderCards(ctx, width, cardsY);
-        this.renderButton(ctx, width, buttonY, "Discard", this.selectedCards.length === 8);
+
+        const buttonWidth = BUTTON_WIDTH;
+
+        const totalButtonWidth = buttonWidth * 2 + gap;
+        const buttonStartX = (width - totalButtonWidth) / 2;
+
+        this.discardButton = this.renderButton(ctx, buttonStartX, buttonY, "Discard", this.selectedCards.length === 8, 'discard');
+        this.hideButton = this.renderButton(ctx, buttonStartX + buttonWidth + gap, buttonY, "Hide", true, 'hide');
     }
 
     renderCards(ctx, width, startY) {
@@ -152,13 +164,18 @@ export class DiscardOverlay extends Overlay {
 
     handleClick(x, y) {
         for (const item of this.cardPositions) {
-          if (isPointInsideRect(x, y, item)) {
+            if (isPointInsideRect(x, y, item)) {
                 this.toggleCard(item.card);
                 return true;
             }
         }
 
-        if (this.isButtonClicked(x, y)) {
+        if (isPointInsideRect(x, y, this.hideButton)) {
+            this.hide();
+            return true;
+        }
+
+        if (isPointInsideRect(x, y, this.discardButton)) {
             if (this.selectedCards.length !== 8) {
                 return true;
             }
@@ -173,5 +190,13 @@ export class DiscardOverlay extends Overlay {
         }
 
         return true;
+    }
+
+    hide() {
+        this.visible = false;
+    }
+
+    show() {
+        this.visible = true;
     }
 }

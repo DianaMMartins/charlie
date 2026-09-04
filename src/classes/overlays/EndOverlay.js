@@ -1,4 +1,4 @@
-import { BUTTON_H, DEFAULT_MARGIN } from "../../enum/gameSizes";
+import { BUTTON_H, BUTTON_WIDTH, DEFAULT_MARGIN } from "../../enum/gameSizes";
 import { Overlay } from "./Overlay";
 
 export class EndOverlay extends Overlay {
@@ -31,13 +31,14 @@ export class EndOverlay extends Overlay {
         const startY = this.getCenteredY(height, totalHeight);
         const titleY = startY + titleHeight / 2;
         const buttonY = startY + titleHeight + gap;
+        const buttonX = (width - BUTTON_WIDTH) / 2;
 
         const title = this.won
             ? "You Won!"
             : "You Lost, try again!";
 
         this.renderTitle(ctx, width, title, titleY);
-        this.renderButton(ctx, width, buttonY, 'Play again');
+        this.renderButton(ctx, buttonX, buttonY, 'Play again');
     }
 
     handleClick(x, y) {

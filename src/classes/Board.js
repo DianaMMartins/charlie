@@ -104,11 +104,8 @@ export class Board {
     }
 
     renderSpecialSpaces(ctx) {
-        const startX = this.x;
-        const startY = this.y + this.cellSize * 7;
-
-        const finishX = this.x + this.cellSize * 7;
-        const finishY = this.y;
+        const startCell = this.getCell(7, 0);
+        const finishCell = this.getCell(0, 7);
 
         ctx.save();
 
@@ -118,22 +115,42 @@ export class Board {
 
         this.renderSpecialSpace(
             ctx,
-            startX,
-            startY,
+            startCell,
             "START"
         );
 
         this.renderSpecialSpace(
             ctx,
-            finishX,
-            finishY,
+            finishCell,
             "FINISH"
         );
 
         ctx.restore();
     }
 
-    renderSpecialSpace(ctx, x, y, label) {
+    renderSpecialSpace(ctx, cell, label) {
+        const { x, y } = this.getCellPosition(
+            cell.row,
+            cell.col
+        );
+
+        if (cell === this.hoveredCell) {
+            ctx.save();
+
+            ctx.fillStyle = this.hoveredCellValid
+                ? "rgb(32, 187, 32)"
+                : "rgb(168, 32, 32)";
+
+            ctx.fillRect(
+                x,
+                y,
+                this.cellSize,
+                this.cellSize
+            );
+
+            ctx.restore();
+        }
+
         ctx.strokeRect(
             x,
             y,

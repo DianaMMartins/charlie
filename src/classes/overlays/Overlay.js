@@ -1,11 +1,11 @@
-import { DEFAULT_MARGIN, BOARD_SIZE } from "../../enum/gameSizes";
+import { DEFAULT_MARGIN, BOARD_SIZE, BUTTON_H, BUTTON_WIDTH } from "../../enum/gameSizes";
 import { addGradientStops, RAINBOW_STOPS, RAINBOW_TEXT_STOPS } from "../../utils/canvas";
 import { isPointInsideRect } from "../../utils/geometry";
 
 export class Overlay {
     constructor() {
         this.active = false;
-        this.button = null;
+        this.buttons = {};
         this.gradientAngle = 0;
     }
 
@@ -47,7 +47,7 @@ export class Overlay {
             height - borderWidth * 2
         );
 
-        
+
         this.renderRainbowBorder(
             ctx,
             0,
@@ -91,16 +91,18 @@ export class Overlay {
         ctx.restore();
     }
 
-    renderButton(ctx, width, y, text, enabled = true) {
-        const buttonWidth = 180;
-        const buttonHeight = 50;
+    renderButton(ctx, x, y, text, enabled = true, id = "button") {
+        const buttonWidth = BUTTON_WIDTH;
+        const buttonHeight = BUTTON_H;
 
-        this.button = {
-            x: (width - buttonWidth) / 2,
-            y: y,
+        const button = {
+            x,
+            y,
             width: buttonWidth,
             height: buttonHeight
         };
+
+        this.buttons[id] = button;
 
         ctx.save();
 
@@ -109,10 +111,10 @@ export class Overlay {
         ctx.beginPath();
 
         ctx.roundRect(
-            this.button.x,
-            this.button.y,
-            this.button.width,
-            this.button.height,
+            button.x,
+            button.y,
+            button.width,
+            button.height,
             BOARD_SIZE
         );
 
@@ -125,11 +127,13 @@ export class Overlay {
 
         ctx.fillText(
             text,
-            this.button.x + this.button.width / 2,
-            this.button.y + this.button.height / 2
+            button.x + button.width / 2,
+            button.y + button.height / 2
         );
 
         ctx.restore();
+
+        return button;
     }
 
     getCenteredY(height, contentHeight) {
@@ -147,7 +151,7 @@ export class Overlay {
             y
         );
 
-       addGradientStops(gradient, RAINBOW_TEXT_STOPS);
+        addGradientStops(gradient, RAINBOW_TEXT_STOPS);
 
         ctx.fillStyle = gradient;
         ctx.font = "42px sans-serif";
@@ -159,12 +163,14 @@ export class Overlay {
         ctx.restore();
     }
 
-    isButtonClicked(x, y) {
-        if (!this.button) {
+    isButtonClicked(x, y, id = "button") {
+        const button = this.buttons[id];
+
+        if (!button) {
             return false;
         }
 
-        return isPointInsideRect(x, y, this.button);
+        return isPointInsideRect(x, y, button);
     }
 
     handleClick(x, y) {

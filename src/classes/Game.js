@@ -1,12 +1,13 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
+import { BUTTON_H, BUTTON_WIDTH, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
 import { InputController } from "./InputController";
+import { isPointInsideRect } from "../utils/geometry";
 
 export class Game {
     constructor() {
@@ -96,6 +97,8 @@ export class Game {
                 this.canvas.height
             );
         }
+
+        this.renderShowDiscardButton();
     }
 
     restart() {
@@ -141,7 +144,7 @@ export class Game {
 
         this.ctx.restore();
     }
-    
+
     renderDraggedCard() {
         if (!this.input.draggedCard) {
             return;
@@ -152,6 +155,65 @@ export class Game {
             this.input.dragX,
             this.input.dragY
         )
+    }
+
+    renderShowDiscardButton() {
+        if (
+            this.overlay !== this.discardOverlay ||
+            this.discardOverlay.visible
+        ) {
+            return;
+        }
+
+        const width = BUTTON_WIDTH;
+        const height = BUTTON_H;
+
+        const x = this.canvas.width - width - UI_MARGIN;
+        const y = UI_MARGIN;
+
+        this.showDiscardButton = {
+            x,
+            y,
+            width,
+            height
+        };
+
+        this.ctx.save();
+
+        this.ctx.fillStyle = "black";
+
+        this.ctx.beginPath();
+
+        this.ctx.roundRect(
+            x,
+            y,
+            width,
+            height,
+            HAND_CARD_GAP
+        );
+
+        this.ctx.fill();
+
+        this.ctx.fillStyle = "white";
+        this.ctx.font = "20px sans-serif";
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
+
+        this.ctx.fillText(
+            "Open to Discard!",
+            x + width / 2,
+            y + height / 2
+        );
+
+        this.ctx.restore();
+    }
+
+    isShowDiscardClicked(x, y) {
+        if (!this.showDiscardButton) {
+            return false;
+        }
+
+        return isPointInsideRect(x, y, this.showDiscardButton);
     }
 
     resize() {
@@ -216,6 +278,35 @@ export class Game {
             this.canvas.height,
             playerY
         );
+    }
+
+    canDropCard(cell, card) {
+        if (!card) {
+            return false;
+        }
+
+        if (card.value === START_CARD) {
+            return (
+                cell.type === START_CARD &&
+                this.action === PLAY_START_CARD
+            );
+        }
+
+        if (card.value === FINISH_CARD) {
+            return (
+                cell.type === FINISH_CARD &&
+                this.board.isFull()
+            );
+        }
+
+        if (typeof card.value === "number") {
+            return (
+                cell.type === NUMBER_CARD &&
+                this.board.validatePlayedCard(cell, card)
+            );
+        }
+
+        return false;
     }
 
     dropCardOnBoard(cell) {

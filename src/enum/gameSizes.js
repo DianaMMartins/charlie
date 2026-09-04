@@ -12,16 +12,14 @@ export const BOARD_Y = DEFAULT_MARGIN;
 
 export const PLAYER_WIDTH = 800;
 
-export const CARD_DIMENSIONS = 100;
+export const CARD_DIMENSIONS = 85;
 export const DISCARD_DIMENSIONS = 75;
 
-export const NUMBER_CARDS = 10;
+export const NUMBER_CARDS = 8; // 80
 export const HAND_SIZE = 5;
 export const HAND_CARD_GAP = 10;
 
 export const DECK_X = DEFAULT_MARGIN;
-export const DECK_Y = 650;
+export const Y = 650;
 
-export const HAND_CARD_Y = 650;
-
-export const DISCARD_Y = 650;
+export const BUTTON_WIDTH = 180;

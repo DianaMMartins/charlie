@@ -36,24 +36,40 @@ export class Player {
 
         this.drawCards(HAND_SIZE);
         this.deck.finishSetup();
+
+        this.discardHovered = false;
     }
 
     setLayout(gameWidth, gameHeight, y) {
         this.width = gameWidth;
         this.height = gameHeight;
 
-        const handWidth = this.getHandWidth();
-        const startX = this.getX(handWidth);
+        const handWidth = this.getMaxHandWidth();
+        const totalWidth =
+            this.cardSize +
+            this.uiMargin +
+            handWidth +
+            this.uiMargin +
+            this.discardSize;
+
+        const startX = (this.width - totalWidth) / 2;
 
         this.deckX = startX;
-        this.handX = startX + this.cardSize + this.uiMargin;
-        this.discardX = this.handX + handWidth + this.cardGap;
+
+        this.handX =
+            startX +
+            this.cardSize +
+            this.uiMargin;
+
+        this.discardX =
+            this.handX +
+            handWidth +
+            this.uiMargin;
 
         this.deckY = y;
         this.handY = y;
         this.discardY = y;
     }
-
     setScale(scale) {
         this.scale = scale;
 
@@ -104,6 +120,19 @@ export class Player {
     }
 
     renderHand(ctx, draggedCard) {
+        ctx.save();
+
+        const maxHandWidth = this.getMaxHandWidth();
+
+        ctx.beginPath();
+        ctx.rect(
+            this.handX,
+            this.handY,
+            maxHandWidth,
+            this.cardSize
+        );
+        ctx.clip();
+
         for (let i = 0; i < this.hand.length; i++) {
             const card = this.hand[i];
 
@@ -113,8 +142,15 @@ export class Player {
 
             const rect = this.getHandCardRect(i);
 
-            card.render(ctx, rect.x, rect.y, rect.width);
+            card.render(
+                ctx,
+                rect.x,
+                rect.y,
+                rect.width
+            );
         }
+
+        ctx.restore();
     }
 
     renderDeck(ctx) {
@@ -127,6 +163,21 @@ export class Player {
 
     renderDiscard(ctx) {
         const card = this.discardPile[this.discardPile.length - 1];
+
+        if (this.discardHovered) {
+            ctx.save();
+
+            ctx.fillStyle = "rgb(32, 187, 32)";
+
+            ctx.fillRect(
+                this.discardX,
+                this.discardY,
+                this.discardSize,
+                this.discardSize
+            );
+
+            ctx.restore();
+        }
 
         if (card) {
             card.renderBack(
@@ -195,6 +246,10 @@ export class Player {
         return (this.width - totalWidth) / 2;
     }
 
+    getMaxHandWidth() {
+        return this.cardSize * 5 + this.cardGap * 4;
+    }
+
     drawCards(amount) {
         const drawnCards = [];
 
@@ -257,5 +312,13 @@ export class Player {
             width: this.discardSize,
             height: this.discardSize
         });
+    }
+
+    setDiscardHovered(value) {
+        this.discardHovered = value;
+    }
+
+    clearDiscardHover() {
+        this.discardHovered = false;
     }
 }
