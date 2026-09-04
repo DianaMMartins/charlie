@@ -1,5 +1,6 @@
 import { BOARD_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
 import { CARD_BACK_IMAGE, CARD_FRONT_IMAGE } from "../assets";
+import { addGradientStops, RAINBOW_STOPS } from "../utils/canvas";
 
 export class Card {
     constructor(value) {
@@ -110,14 +111,7 @@ export class Card {
                 y
             );
 
-            gradient.addColorStop(0.00, "#ff5c5c");
-            gradient.addColorStop(0.14, "#ff9f43");
-            gradient.addColorStop(0.28, "#f6d743");
-            gradient.addColorStop(0.42, "#4cd964");
-            gradient.addColorStop(0.56, "#22d3ee");
-            gradient.addColorStop(0.70, "#5b8def");
-            gradient.addColorStop(0.84, "#8b6cff");
-            gradient.addColorStop(1.00, "#ff69d4");
+            addGradientStops(gradient, RAINBOW_STOPS);
 
             ctx.fillStyle = gradient;
         } else {
@@ -139,14 +133,7 @@ export class Card {
             y + size
         );
 
-        gradient.addColorStop(0.00, "#ff5c5c");
-        gradient.addColorStop(0.14, "#ff9f43");
-        gradient.addColorStop(0.28, "#f6d743");
-        gradient.addColorStop(0.42, "#4cd964");
-        gradient.addColorStop(0.56, "#22d3ee");
-        gradient.addColorStop(0.70, "#5b8def");
-        gradient.addColorStop(0.84, "#8b6cff");
-        gradient.addColorStop(1.00, "#ff69d4");
+        addGradientStops(gradient, RAINBOW_STOPS);
 
         ctx.beginPath();
 

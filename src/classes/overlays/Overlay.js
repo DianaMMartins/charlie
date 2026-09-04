@@ -1,4 +1,6 @@
 import { DEFAULT_MARGIN, BOARD_SIZE } from "../../enum/gameSizes";
+import { addGradientStops, RAINBOW_STOPS, RAINBOW_TEXT_STOPS } from "../../utils/canvas";
+import { isPointInsideRect } from "../../utils/geometry";
 
 export class Overlay {
     constructor() {
@@ -70,15 +72,7 @@ export class Overlay {
             centerY
         );
 
-        gradient.addColorStop(0.00, "#ff5c5c");
-        gradient.addColorStop(0.14, "#ff9f43");
-        gradient.addColorStop(0.28, "#f6d743");
-        gradient.addColorStop(0.42, "#4cd964");
-        gradient.addColorStop(0.56, "#22d3ee");
-        gradient.addColorStop(0.70, "#5b8def");
-        gradient.addColorStop(0.84, "#8b6cff");
-        gradient.addColorStop(0.96, "#ff69d4");
-        gradient.addColorStop(1.00, "#ff5c5c");
+        addGradientStops(gradient, RAINBOW_STOPS);
 
         ctx.strokeStyle = gradient;
         ctx.lineWidth = borderWidth;
@@ -153,14 +147,7 @@ export class Overlay {
             y
         );
 
-        gradient.addColorStop(0.00, "#ff5c5c");
-        gradient.addColorStop(0.14, "#ff9f43");
-        gradient.addColorStop(0.28, "#f6d743");
-        gradient.addColorStop(0.42, "#4cd964");
-        gradient.addColorStop(0.56, "#22d3ee");
-        gradient.addColorStop(0.70, "#5b8def");
-        gradient.addColorStop(0.84, "#8b6cff");
-        gradient.addColorStop(1.00, "#ff69d4");
+       addGradientStops(gradient, RAINBOW_TEXT_STOPS);
 
         ctx.fillStyle = gradient;
         ctx.font = "42px sans-serif";
@@ -177,12 +164,7 @@ export class Overlay {
             return false;
         }
 
-        return (
-            x >= this.button.x &&
-            x <= this.button.x + this.button.width &&
-            y >= this.button.y &&
-            y <= this.button.y + this.button.height
-        )
+        return isPointInsideRect(x, y, this.button);
     }
 
     handleClick(x, y) {

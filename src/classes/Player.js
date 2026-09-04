@@ -6,6 +6,7 @@ import {
     DISCARD_DIMENSIONS,
     UI_MARGIN
 } from "../enum/gameSizes";
+import { isPointInsideRect } from "../utils/geometry";
 import { Deck } from "./Deck";
 
 export class Player {
@@ -101,6 +102,7 @@ export class Player {
             y: this.handY
         };
     }
+
     renderHand(ctx, draggedCard) {
         for (let i = 0; i < this.hand.length; i++) {
             const card = this.hand[i];
@@ -109,9 +111,9 @@ export class Player {
                 continue;
             }
 
-            const { x, y } = this.renderHandCardPosition(i);
+            const rect = this.getHandCardRect(i);
 
-            card.render(ctx, x, y, this.cardSize);
+            card.render(ctx, rect.x, rect.y, rect.width);
         }
     }
 
@@ -207,7 +209,7 @@ export class Player {
 
         return drawnCards;
     }
-    
+
     removeCard(card) {
         const index = this.hand.indexOf(card);
 
@@ -227,9 +229,9 @@ export class Player {
 
     getCardAtPosition(x, y) {
         for (let i = 0; i < this.hand.length; i++) {
-            const { x: cardX, y: cardY } = this.renderHandCardPosition(i);
+            const rect = this.getHandCardRect(i);
 
-            if (this.isPointInside(x, y, cardX, cardY)) {
+            if (isPointInsideRect(x, y, rect)) {
                 return this.hand[i];
             }
         }
@@ -237,22 +239,23 @@ export class Player {
         return null;
     }
 
-    isPointInside(x, y, cardX, cardY, size = this.cardSize) {
-        return (
-            x >= cardX &&
-            x <= cardX + size &&
-            y >= cardY &&
-            y <= cardY + size
-        )
+    getHandCardRect(index) {
+        const { x, y } = this.renderHandCardPosition(index);
+
+        return {
+            x,
+            y,
+            width: this.cardSize,
+            height: this.cardSize
+        };
     }
 
     isPointInsideDiscard(x, y) {
-        return this.isPointInside(
-            x,
-            y,
-            this.discardX,
-            this.discardY,
-            this.discardSize
-        );
+        return isPointInsideRect(x, y, {
+            x: this.discardX,
+            y: this.discardY,
+            width: this.discardSize,
+            height: this.discardSize
+        });
     }
 }

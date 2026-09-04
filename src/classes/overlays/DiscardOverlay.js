@@ -1,4 +1,5 @@
 import { BUTTON_H, DEFAULT_MARGIN, UI_MARGIN } from "../../enum/gameSizes";
+import { isPointInsideRect } from "../../utils/geometry";
 import { Overlay } from "./Overlay";
 
 export class DiscardOverlay extends Overlay {
@@ -12,7 +13,7 @@ export class DiscardOverlay extends Overlay {
         this.cardPositions = [];
 
         this.columns = 4;
-        this.gap = 20;
+        this.gap = UI_MARGIN;
 
         this.onDiscard = null;
     }
@@ -48,7 +49,7 @@ export class DiscardOverlay extends Overlay {
         const cardsHeight = rows * this.player.cardSize + (rows - 1) * this.gap;
 
         const totalHeight = titleHeight + gap + cardsHeight + gap + buttonHeight;
-        const startY = this.getCenteredY(height,totalHeight);
+        const startY = this.getCenteredY(height, totalHeight);
 
         const titleY = startY + titleHeight / 2;
         const cardsY = startY + titleHeight + gap;
@@ -62,7 +63,7 @@ export class DiscardOverlay extends Overlay {
             titleY
         );
         this.renderCards(ctx, width, cardsY);
-        this.renderButton(ctx, width, buttonY, "Disacrd", this.selectedCards.length === 8);
+        this.renderButton(ctx, width, buttonY, "Discard", this.selectedCards.length === 8);
     }
 
     renderCards(ctx, width, startY) {
@@ -90,7 +91,9 @@ export class DiscardOverlay extends Overlay {
             this.cardPositions.push({
                 card,
                 x,
-                y
+                y,
+                width: cardSize,
+                height: cardSize
             });
 
             card.renderFront(
@@ -149,12 +152,7 @@ export class DiscardOverlay extends Overlay {
 
     handleClick(x, y) {
         for (const item of this.cardPositions) {
-            if (
-                x >= item.x &&
-                x <= item.x + this.player.cardSize &&
-                y >= item.y &&
-                y <= item.y + this.player.cardSize
-            ) {
+          if (isPointInsideRect(x, y, item)) {
                 this.toggleCard(item.card);
                 return true;
             }

@@ -147,7 +147,7 @@ export class Game {
 
         this.ctx.restore();
     }
-
+    
     renderDraggedCard() {
         if (!this.draggedCard) {
             return;
