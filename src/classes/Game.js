@@ -6,6 +6,7 @@ import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, 
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
+import { InputController } from "./InputController";
 
 export class Game {
     constructor() {
@@ -31,14 +32,7 @@ export class Game {
         this.discardRequired = 0;
         this.message = "";
 
-        this.draggedCard = null;
-        this.dragging = false;
-
-        this.dragX = 0;
-        this.dragY = 0;
-
-        this.dragOffsetX = 0;
-        this.dragOffsetY = 0;
+        this.input = new InputController(this);
 
         this.resize();
 
@@ -46,7 +40,7 @@ export class Game {
             this.resize();
         })
 
-        this.setupInput();
+        this.input.setup();
     }
 
     start() {
@@ -91,7 +85,7 @@ export class Game {
 
         this.board.render(this.ctx);
         this.renderMessage();
-        this.player.render(this.ctx, this.draggedCard);
+        this.player.render(this.ctx, this.input.draggedCard);
 
         this.renderDraggedCard();
 
@@ -149,14 +143,14 @@ export class Game {
     }
     
     renderDraggedCard() {
-        if (!this.draggedCard) {
+        if (!this.input.draggedCard) {
             return;
         }
 
-        this.draggedCard.render(
+        this.input.draggedCard.render(
             this.ctx,
-            this.dragX,
-            this.dragY
+            this.input.dragX,
+            this.input.dragY
         )
     }
 
@@ -224,125 +218,20 @@ export class Game {
         );
     }
 
-    setupInput() {
-        this.canvas.addEventListener("pointerdown", (e) => {
-            const { x, y } = this.getPointerPosition(e);
-
-            if (this.overlay) {
-                this.overlay.handleClick(x, y);
-                return;
-            }
-
-            this.startDrag(e);
-        });
-
-        if (!this.overlay) {
-            this.canvas.addEventListener("pointermove", (e) => {
-
-                this.updateDrag(e);
-            });
-
-            this.canvas.addEventListener("pointerup", (e) => {
-
-                this.endDrag(e);
-            });
-
-            this.canvas.addEventListener("pointercancel", () => {
-                this.cancelDrag();
-            });
-        }
-    }
-
-    getPointerPosition(e) {
-        const rect = this.canvas.getBoundingClientRect();
-
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
-
-        return {
-            x: (e.clientX - rect.left) * scaleX,
-            y: (e.clientY - rect.top) * scaleY
-        };
-    }
-
-    startDrag(e) {
-        const { x, y } = this.getPointerPosition(e);
-        const card = this.player.getCardAtPosition(x, y);
-
-        if (!card) {
-            return;
-        }
-
-        const index = this.player.hand.indexOf(card);
-        const { x: cardX, y: cardY } = this.player.renderHandCardPosition(index);
-
-        this.draggedCard = card;
-        this.dragging = true;
-
-        this.dragOffsetX = x - cardX;
-        this.dragOffsetY = y - cardY;
-
-        this.dragX = cardX;
-        this.dragY = cardY;
-
-        this.canvas.setPointerCapture(e.pointerId);
-    }
-
-    updateDrag(e) {
-        if (!this.dragging) {
-            return;
-        }
-
-        const { x, y } = this.getPointerPosition(e);
-
-        this.dragX = x - this.dragOffsetX;
-        this.dragY = y - this.dragOffsetY;
-    }
-
-    endDrag(e) {
-        if (!this.dragging) {
-            return;
-        }
-
-        const { x, y } = this.getPointerPosition(e);
-
-        const discardArea = this.player.isPointInsideDiscard(x, y);
-
-        if (discardArea) {
-            this.dropCardOnDiscard();
-            return;
-        }
-
-        const boardCell = this.board.getCellAtPosition(x, y);
-
-        if (boardCell && boardCell.card === null) {
-            this.dropCardOnBoard(boardCell);
-
-            return;
-        }
-
-        this.cancelDrag();
-    }
-
-    cancelDrag() {
-        this.draggedCard = null;
-        this.dragging = false;
-    }
-
     dropCardOnBoard(cell) {
         if (this.action === DISCARD_CARD || this.action === REQUIRED_DISCARD) {
-            this.cancelDrag();
+            this.input.cancelDrag();
             return;
         }
 
-        const card = this.draggedCard;
+        const card = this.input.draggedCard;
 
         if (!card) {
             return;
         }
 
         if (!this.playCard(cell, card)) {
-            this.cancelDrag();
+            this.input.cancelDrag();
             return;
         }
 
@@ -350,7 +239,7 @@ export class Game {
 
         if (this.action === DISCARD_START_CARDS) {
             this.discardCount = 0;
-            this.cancelDrag();
+            this.input.cancelDrag();
 
             return;
         }
@@ -358,7 +247,7 @@ export class Game {
         if (this.discardRequired > 0) {
             this.message = `Discard ${this.discardRequired} cards`;
             this.action = REQUIRED_DISCARD;
-            this.cancelDrag();
+            this.input.cancelDrag();
 
             return;
         }
@@ -367,7 +256,7 @@ export class Game {
     }
 
     dropCardOnDiscard() {
-        const card = this.draggedCard;
+        const card = this.input.draggedCard;
 
         if (!card) {
             return false;
@@ -378,7 +267,7 @@ export class Game {
             this.action !== DISCARD_CARD &&
             this.action !== REQUIRED_DISCARD
         ) {
-            this.cancelDrag();
+            this.input.cancelDrag();
             return false;
         }
 
@@ -398,7 +287,7 @@ export class Game {
 
                 this.message = `Discard ${remaining} cards`;
 
-                this.cancelDrag();
+                this.input.cancelDrag();
             }
 
             return true;
@@ -410,7 +299,7 @@ export class Game {
             this.endTurn();
         } else {
             this.message = DISCARD_MSG;
-            this.cancelDrag();
+            this.input.cancelDrag();
         }
 
         return true;
@@ -543,7 +432,7 @@ export class Game {
 
         const drawCards = this.player.drawCards(HAND_SIZE - this.player.hand.length);
 
-        this.cancelDrag();
+        this.input.cancelDrag();
 
         if (this.player.hand.length === 0) {
             this.endGame(false);
@@ -566,7 +455,7 @@ export class Game {
     endGame(won) {
         this.status = won ? GAME_WON : GAME_LOST;
         this.action = null;
-        this.cancelDrag();
+        this.input.cancelDrag();
 
         this.overlay = this.endOverlay;
 
