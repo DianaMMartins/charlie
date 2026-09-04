@@ -1,3 +1,5 @@
+import { FINISH_CARD, START_CARD } from "../enum/cardTypes.";
+
 export class InputController {
     constructor(game) {
         this.game = game;
@@ -13,7 +15,7 @@ export class InputController {
     }
 
     setup() {
-        this.game.canvas.addEventListener("pointerdown", (e) => this.startDrag(e) );
+        this.game.canvas.addEventListener("pointerdown", (e) => this.startDrag(e));
 
         this.game.canvas.addEventListener("pointermove", (e) => this.updateDrag(e));
 
@@ -74,6 +76,26 @@ export class InputController {
 
         this.dragX = x - this.dragOffsetX;
         this.dragY = y - this.dragOffsetY;
+
+        const boardCell = this.game.board.getCellAtPosition(x, y);
+
+        if (!boardCell || boardCell.card) {
+            this.game.board.clearHoveredCell();
+            return;
+        }
+
+        const isSpecialCell =
+            this.draggedCard.value === START_CARD
+            || this.draggedCard.value === FINISH_CARD;
+
+        const valid =
+            !isSpecialCell &&
+            this.game.board.validatePlayedCard(
+                boardCell,
+                this.draggedCard
+            );
+
+        this.game.board.setHoveredCell(boardCell, valid);
     }
 
     endDrag(e) {
@@ -108,5 +130,7 @@ export class InputController {
     cancelDrag() {
         this.draggedCard = null;
         this.dragging = false;
+
+        this.game.board.clearHoveredCell();
     }
 }

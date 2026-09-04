@@ -20,6 +20,9 @@ export class Board {
         this.cells = [];
 
         this.createCells();
+
+        this.hoveredCell = null;
+        this.hoveredCellValid = false;
     }
 
     render(ctx) {
@@ -59,7 +62,20 @@ export class Board {
 
         for (let row = start; row < end; row++) {
             for (let col = start; col < end; col++) {
+                const cell = this.getCell(row, col);
                 const { x, y } = this.getCellPosition(row, col);
+
+                if (cell === this.hoveredCell) {
+                    ctx.save();
+
+                    ctx.fillStyle = this.hoveredCellValid
+                        ? "rgb(32, 187, 32)"
+                        : "rgb(168, 32, 32)";
+
+                    ctx.fillRect(x, y, this.cellSize, this.cellSize);
+
+                    ctx.restore();
+                }
 
                 ctx.strokeRect(
                     x,
@@ -185,7 +201,7 @@ export class Board {
         }
 
         cell.card = card;
-       
+
         return true;
     }
 
@@ -208,8 +224,8 @@ export class Board {
         const after = cells.slice(i + 1).find(cell => cell.card);
 
         if (
-             (before && card.value <= before.card.value) ||
-             (after && card.value >= after.card.value)
+            (before && card.value <= before.card.value) ||
+            (after && card.value >= after.card.value)
         ) {
             return false;
         }
@@ -220,7 +236,7 @@ export class Board {
     getPlayableCells() {
         return this.cells
             .filter(cell => cell.type === NUMBER_CARD)
-            .sort((a, b) => {             
+            .sort((a, b) => {
                 if (a.row !== b.row) {
                     return b.row - a.row;
                 }
@@ -241,7 +257,7 @@ export class Board {
         return this.getPlayableCells().every(cell => cell.card !== null);
     }
 
-    getCardDifference(cardA, cardB) {     
+    getCardDifference(cardA, cardB) {
         return Math.abs(cardA.value - cardB.value);
     }
 
@@ -263,5 +279,15 @@ export class Board {
         }
 
         return cards;
+    }
+
+    setHoveredCell(cell, valid) {
+        this.hoveredCell = cell;
+        this.hoveredCellValid = valid;
+    }
+
+    clearHoveredCell() {
+        this.hoveredCell = null;
+        this.hoveredCellValid = false;
     }
 }
