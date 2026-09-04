@@ -8,6 +8,7 @@ import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
 import { InputController } from "./InputController";
 import { isPointInsideRect } from "../utils/geometry";
+import { startAmbience, stopAmbience } from "../ambience";
 
 export class Game {
     constructor() {
@@ -34,6 +35,9 @@ export class Game {
         this.message = "";
 
         this.input = new InputController(this);
+
+        this.audioMuted = false;
+        this.audioBtn = null;
 
         this.resize();
 
@@ -64,6 +68,10 @@ export class Game {
         this.action = PLAY_CARD;
         this.discardCount = 0;
         this.message = PLAY_MSG;
+
+        if (!this.audioMuted) {
+            startAmbience();
+        }
     }
 
     loop() {
@@ -99,6 +107,7 @@ export class Game {
         }
 
         this.renderShowDiscardButton();
+        this.renderAudioButton(this.ctx);
     }
 
     restart() {
@@ -517,6 +526,60 @@ export class Game {
         return discardRequired;
     }
 
+    renderAudioButton(ctx) {
+        const size = 44;
+        const margin = 12;
+
+        const x = this.canvas.width - size - margin;
+        const y = margin;
+
+        this.audioButton = {
+            x,
+            y,
+            width: size,
+            height: size
+        };
+
+        ctx.save();
+
+        ctx.fillStyle = "black";
+
+        ctx.beginPath();
+        ctx.roundRect(x, y, size, size, 8);
+        ctx.fill();
+
+        ctx.fillStyle = "white";
+        ctx.font = "22px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(
+            this.audioMuted ? "🔇" : "🔊",
+            x + size / 2,
+            y + size / 2
+        );
+
+        ctx.restore();
+    }
+
+    isAudioButtonClicked(x, y) {
+        if (!this.audioButton) {
+            return false;
+        }
+
+        return isPointInsideRect(x, y, this.audioButton);
+    }
+
+    toggleAudio() {
+        this.audioMuted = !this.audioMuted;
+
+        if (this.audioMuted) {
+            stopAmbience();
+        } else if (this.status === GAME_PLAY) {
+            startAmbience();
+        }
+    }
+
     endTurn() {
         this.discardCount = 0;
         this.discardRequired = 0;
@@ -547,6 +610,8 @@ export class Game {
         this.status = won ? GAME_WON : GAME_LOST;
         this.action = null;
         this.input.cancelDrag();
+
+        stopAmbience();
 
         this.overlay = this.endOverlay;
 

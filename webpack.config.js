@@ -19,7 +19,7 @@ module.exports = {
                 type: "javascript/auto",
             },
             {
-                test: /\.(svg)$/i,
+                test: /\.svg$/i,
                 type: "asset/resource",
             },
         ],
@@ -30,35 +30,6 @@ module.exports = {
             directory: path.join(__dirname, "src"),
         },
         port: 8080,
+        open: true,
     },
 };
-
-// const path = require("path");
-
-// module.exports = {
-//     entry: "./src/main.js",
-
-//     output: {
-//         filename: "main.js",
-//         path: path.resolve(__dirname, "dist"),
-//         clean: true,
-//     },
-
-//     module: {
-//         rules: [
-//             {
-//                 test: /\.js$/,
-//                 exclude: /node_modules/,
-//             },
-//             {
-//                 test: /\.(png|jpg|jpeg|gif)$/i,
-//                 type: "asset/resource",
-//             },
-//         ],
-//     },
-
-//     devServer: {
-//         static: "./src",
-//         port: 8080,
-//     },
-// };

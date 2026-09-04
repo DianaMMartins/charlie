@@ -40,6 +40,11 @@ export class InputController {
     startDrag(e) {
         const { x, y } = this.getPointerPosition(e);
 
+        if (this.game.isAudioButtonClicked(x, y)) {
+            this.game.toggleAudio();
+            return;
+        }
+
         if (this.game.isShowDiscardClicked(x, y)) {
             this.game.discardOverlay.show();
             return;
@@ -142,5 +147,13 @@ export class InputController {
 
         this.game.board.clearHoveredCell();
         this.game.player.clearDiscardHover();
+    }
+
+    isAudioButtonClicked(x, y) {
+        if (!this.audioButton) {
+            return false;
+        }
+
+        return isPointInsideRect(x, y, this.audioButton);
     }
 }
