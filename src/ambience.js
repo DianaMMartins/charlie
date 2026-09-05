@@ -13,35 +13,41 @@ let oceanGain = null;
 let oceanFilter = null;
 
 const NOTES = [
-    261.63, // C
-    293.66, // D
-    329.63, // E
-    392.0,  // G
-    440.0,  // A
-    523.25, // C
-    587.33, // D
-    659.25  // E
-];
-
-const DRUM_PATTERN = [
-    [0, 0.75],
-    [3.8, 0.35],
-    [8.5, 0.50],
-    [14.2, 0.25],
-    [19, 0.40]
+    261.63,
+    293.66,
+    329.63,
+    392.0, 
+    440.0, 
+    523.25,
+    587.33,
+    659.25 
 ];
 
 const MELODY_PATTERN = [
-    [0.8, 0, 0.32],
-    [2.6, 2, 0.22],
+    [0.5, 2, 0.22],
+    [0.9, 6, 0.28],
+    [2.6, 5, 0.22],
     [4.7, 3, 0.20],
-    [6.9, 1, 0.18],
-    [9.2, 4, 0.16],
-    [11.4, 5, 0.14],
-    [13.8, 7, 0.11],
-    [16, 6, 0.10],
-    [18, 4, 0.13],
-    [20, 3, 0.09]
+    [5.15, 6, 0.16],
+
+    [6.55, 7, 0.21],
+    [7.2, 5, 0.18],
+
+    [8.55, 3, 0.16],
+    [9.15, 0, 0.18],
+    [10.15, 2, 0.14],
+
+    [11.55, 4, 0.17],
+    [12.25, 7, 0.19],
+    [13.55, 5, 0.14],
+
+    [15.0, 2, 0.13],
+    [15.65, 1, 0.17],
+    [16.65, 0, 0.14],
+
+    [18.15, 5, 0.16],
+    [19.05, 3, 0.13],
+    [20.1, 4, 0.10] 
 ];
 
 const WIND_TIMES = [
@@ -94,10 +100,6 @@ function playLoop() {
 
     const now = ctx.currentTime;
 
-    DRUM_PATTERN.forEach(([time, volume]) => {
-        drum(now + time, volume);
-    });
-
     MELODY_PATTERN.forEach(([time, note, volume]) => {
         tone(now + time, NOTES[note], volume);
     });
@@ -112,44 +114,6 @@ function playLoop() {
     );
 }
 
-function drum(time, volume) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "triangle";
-
-    osc.frequency.setValueAtTime(
-        170,
-        time
-    );
-
-    osc.frequency.exponentialRampToValueAtTime(
-        85,
-        time + 0.16
-    );
-
-    gain.gain.setValueAtTime(
-        0.0001,
-        time
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.035 * volume,
-        time + 0.025
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        time + 0.7
-    );
-
-    osc.connect(gain);
-    gain.connect(master);
-
-    osc.start(time);
-    osc.stop(time + 0.75);
-}
-
 function tone(time, frequency, volume) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -158,6 +122,8 @@ function tone(time, frequency, volume) {
 
     osc.frequency.value = frequency;
 
+    const duration = 4.5 + Math.random() * 3;
+
     gain.gain.setValueAtTime(
         0.0001,
         time
@@ -165,19 +131,21 @@ function tone(time, frequency, volume) {
 
     gain.gain.exponentialRampToValueAtTime(
         volume,
-        time + 0.04
+        time + 0.05
     );
 
     gain.gain.exponentialRampToValueAtTime(
         0.0001,
-        time + 6
+        time + duration
     );
 
     osc.connect(gain);
+  
     gain.connect(master);
 
     osc.start(time);
-    osc.stop(time + 6.1);
+   
+    osc.stop(time + duration + 0.1);
 }
 
 function startOcean() {
@@ -318,7 +286,7 @@ export async function stopAmbience() {
         try {
             oceanSource.stop();
         } catch {
-            // Source may already have stopped.
+           
         }
 
         oceanSource = null;
