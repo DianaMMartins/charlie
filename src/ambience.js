@@ -1,26 +1,18 @@
 let ctx = null;
-
 let master = null;
+
+let effectsCtx = null;
+let effectsGain = null;
 
 let playing = false;
 
 let timer = null;
-
 let oceanSource = null;
-
 let oceanGain = null;
 
-let oceanFilter = null;
-
 const NOTES = [
-    261.63,
-    293.66,
-    329.63,
-    392.0, 
-    440.0, 
-    523.25,
-    587.33,
-    659.25 
+    261.63, 293.66, 329.63, 392.0,
+    440.0, 523.25, 587.33, 659.25
 ];
 
 const MELODY_PATTERN = [
@@ -47,19 +39,13 @@ const MELODY_PATTERN = [
 
     [18.15, 5, 0.16],
     [19.05, 3, 0.13],
-    [20.1, 4, 0.10] 
+    [20.1, 4, 0.10]
 ];
 
-const WIND_TIMES = [
-    4.5,
-    11.5,
-    17.5
-];
+const WIND_TIMES = [4.5, 11.5, 17.5];
 
 export async function startAmbience() {
-    if (playing) {
-        return;
-    }
+    if (playing) return;
 
     ctx = new (
         window.AudioContext ||
@@ -73,152 +59,122 @@ export async function startAmbience() {
     playing = true;
 
     master = ctx.createGain();
-
-    master.gain.setValueAtTime(
-        0,
-        ctx.currentTime
-    );
-
-    master.gain.linearRampToValueAtTime(
-        0.95,
-        ctx.currentTime + 5
-    );
-
+    master.gain.value = 0.95;
     master.connect(ctx.destination);
 
+    if (!effectsCtx) {
+        effectsCtx = new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        );
+
+        effectsGain = effectsCtx.createGain();
+        effectsGain.gain.value = 1;
+        effectsGain.connect(effectsCtx.destination);
+    }
+
     startOcean();
-
     animateOcean();
-
     playLoop();
 }
 
 function playLoop() {
-    if (!playing) {
-        return;
-    }
+    if (!playing) return;
 
     const now = ctx.currentTime;
 
     MELODY_PATTERN.forEach(([time, note, volume]) => {
-        tone(now + time, NOTES[note], volume);
+        playTone(now + time, NOTES[note], volume);
     });
 
     WIND_TIMES.forEach(time => {
-        wind(now + time, 5);
+        playWind(now + time);
     });
 
-    timer = setTimeout(
-        playLoop,
-        21000
-    );
+    timer = setTimeout(playLoop, 21000);
 }
 
-function tone(time, frequency, volume) {
-    const osc = ctx.createOscillator();
+function createGain(time, peak, attack, release, destination = master) {
     const gain = ctx.createGain();
 
-    osc.type = "sine";
+    gain.gain.setValueAtTime(0.0001, time);
 
-    osc.frequency.value = frequency;
+    gain.gain.exponentialRampToValueAtTime(
+        peak,
+        time + attack
+    );
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        time + release
+    );
 
+    gain.connect(destination);
+
+    return gain;
+}
+
+function playTone(time, frequency, volume) {
+    const osc = ctx.createOscillator();
     const duration = 4.5 + Math.random() * 3;
 
-    gain.gain.setValueAtTime(
-        0.0001,
-        time
-    );
+    osc.type = "sine";
+    osc.frequency.value = frequency;
 
-    gain.gain.exponentialRampToValueAtTime(
+    const gain = createGain(
+        time,
         volume,
-        time + 0.05
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        time + duration
+        0.05,
+        duration
     );
 
     osc.connect(gain);
-  
-    gain.connect(master);
 
     osc.start(time);
-   
     osc.stop(time + duration + 0.1);
 }
 
-function startOcean() {
-    const bufferSize = ctx.sampleRate * 2;
+export async function playErrorSound() {
+    if (!effectsCtx || !effectsGain) return;
 
-    const buffer = ctx.createBuffer(
-        1,
-        bufferSize,
-        ctx.sampleRate
-    );
-
-    const data = buffer.getChannelData(0);
-
-    for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
+    if (effectsCtx.state === "suspended") {
+        await effectsCtx.resume();
     }
 
-    oceanSource = ctx.createBufferSource();
+    const time = effectsCtx.currentTime;
 
-    oceanSource.buffer = buffer;
-    oceanSource.loop = true;
+    const osc = effectsCtx.createOscillator();
 
-    oceanFilter = ctx.createBiquadFilter();
+    osc.type = "square";
 
-    oceanFilter.type = "lowpass";
+    osc.frequency.setValueAtTime(220, time);
 
-    oceanFilter.frequency.value = 900;
+    osc.frequency.exponentialRampToValueAtTime(
+        110,
+        time + 0.18
+    );
 
-    oceanFilter.Q.value = 0.7;
+    const gain = effectsCtx.createGain();
 
-    oceanGain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
 
-    oceanGain.gain.value = 0.03;
+    gain.gain.exponentialRampToValueAtTime(
+        0.09,
+        time + 0.01
+    );
 
-    oceanSource
-        .connect(oceanFilter)
-        .connect(oceanGain)
-        .connect(master);
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        time + 0.22
+    );
 
-    oceanSource.start();
+    osc.connect(gain);
+    gain.connect(effectsGain);
+
+    osc.start(time);
+    osc.stop(time + 0.23);
 }
 
-function animateOcean() {
-    if (!playing) {
-        return;
-    }
-
-    const now = ctx.currentTime;
-
-    oceanGain.gain.cancelScheduledValues(now);
-
-    oceanGain.gain.setValueAtTime(
-        0.03,
-        now
-    );
-
-    oceanGain.gain.linearRampToValueAtTime(
-        0.06,
-        now + 2.5
-    );
-
-    oceanGain.gain.linearRampToValueAtTime(
-        0.03,
-        now + 5.5
-    );
-
-    setTimeout(
-        animateOcean,
-        5500
-    );
-}
-
-function wind(time, duration = 5) {
+function createNoiseBuffer(duration) {
     const buffer = ctx.createBuffer(
         1,
         ctx.sampleRate * duration,
@@ -231,49 +187,79 @@ function wind(time, duration = 5) {
         data[i] = Math.random() * 2 - 1;
     }
 
+    return buffer;
+}
+
+function startOcean() {
     const source = ctx.createBufferSource();
 
+    source.buffer = createNoiseBuffer(2);
+    source.loop = true;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 900;
+    filter.Q.value = 0.7;
+
+    oceanGain = ctx.createGain();
+    oceanGain.gain.value = 0.03;
+
+    source
+        .connect(filter)
+        .connect(oceanGain)
+        .connect(master);
+
+    source.start();
+
+    oceanSource = source;
+}
+
+function animateOcean() {
+    if (!playing) return;
+
+    const now = ctx.currentTime;
+
+    oceanGain.gain.cancelScheduledValues(now);
+    oceanGain.gain.setValueAtTime(0.03, now);
+    oceanGain.gain.linearRampToValueAtTime(
+        0.06,
+        now + 2.5
+    );
+    oceanGain.gain.linearRampToValueAtTime(
+        0.03,
+        now + 5.5
+    );
+
+    setTimeout(animateOcean, 5500);
+}
+
+function playWind(time, duration = 5) {
+    const source = ctx.createBufferSource();
     const filter = ctx.createBiquadFilter();
 
-    const gain = ctx.createGain();
-
-    source.buffer = buffer;
+    source.buffer = createNoiseBuffer(duration);
 
     filter.type = "bandpass";
-
     filter.frequency.value = 1400;
-
     filter.Q.value = 0.35;
 
-    gain.gain.setValueAtTime(
-        0.0001,
-        time
-    );
-
-    gain.gain.linearRampToValueAtTime(
+    const gain = createGain(
+        time,
         0.012,
-        time + duration * 0.35
-    );
-
-    gain.gain.linearRampToValueAtTime(
-        0.0001,
-        time + duration
+        duration * 0.35,
+        duration
     );
 
     source
         .connect(filter)
-        .connect(gain)
-        .connect(master);
+        .connect(gain);
 
     source.start(time);
-
     source.stop(time + duration);
 }
 
 export async function stopAmbience() {
-    if (!playing) {
-        return;
-    }
+    if (!ctx) return;
 
     playing = false;
 
@@ -285,15 +271,9 @@ export async function stopAmbience() {
     if (oceanSource) {
         try {
             oceanSource.stop();
-        } catch {
-           
-        }
+        } catch { }
 
         oceanSource = null;
-    }
-
-    if (!ctx) {
-        return;
     }
 
     await ctx.close();
@@ -301,7 +281,6 @@ export async function stopAmbience() {
     ctx = null;
     master = null;
     oceanGain = null;
-    oceanFilter = null;
 }
 
 export function isPlaying() {

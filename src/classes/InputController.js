@@ -1,3 +1,4 @@
+import { playErrorSound } from "../ambience";
 import { FINISH_CARD, START_CARD } from "../enum/cardTypes.";
 
 export class InputController {
@@ -93,6 +94,8 @@ export class InputController {
                 this.draggedCard
             );
 
+
+
             this.game.board.setHoveredCell(
                 boardCell,
                 valid
@@ -132,9 +135,15 @@ export class InputController {
         const boardCell = this.game.board.getCellAtPosition(x, y);
 
         if (boardCell && boardCell.card === null) {
+            if (!this.game.canDropCard(boardCell, this.draggedCard)) {
+                playErrorSound();
+                this.cancelDrag();
+                
+                return;
+            }
+
             this.game.dropCardOnBoard(boardCell);
             this.cancelDrag();
-
             return;
         }
 

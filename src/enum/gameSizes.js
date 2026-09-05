@@ -15,7 +15,7 @@ export const PLAYER_WIDTH = 800;
 export const CARD_DIMENSIONS = 85;
 export const DISCARD_DIMENSIONS = 75;
 
-export const NUMBER_CARDS = 8; // 80
+export const NUMBER_CARDS = 18; // 80
 export const HAND_SIZE = 5;
 export const HAND_CARD_GAP = 10;
 
