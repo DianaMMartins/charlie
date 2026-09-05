@@ -263,13 +263,13 @@ function animateOcean() {
     const now = ctx.currentTime;
 
     oceanGain.gain.cancelScheduledValues(now);
-    oceanGain.gain.setValueAtTime(0.03, now);  // base volume
+    oceanGain.gain.setValueAtTime(0.05, now);
     oceanGain.gain.linearRampToValueAtTime(
-        0.06,  // peak volume
+        0.3,
         now + 2.5
     );
     oceanGain.gain.linearRampToValueAtTime(
-        0.03,   // matches base
+        0.05,
         now + 5.5
     );
 
