@@ -104,8 +104,8 @@ export class Board {
     }
 
     renderSpecialSpaces(ctx) {
-        const startCell = this.getCell(7, 0);
-        const finishCell = this.getCell(0, 7);
+        const startCell = this.getCell(BOARD_SIZE - 1, 0);
+        const finishCell = this.getCell(0, BOARD_SIZE - 1);
 
         ctx.save();
 
@@ -170,11 +170,11 @@ export class Board {
             for (let col = 0; col < this.size; col++) {
                 let type = null;
 
-                if (row >= 1 && row <= 6 && col >= 1 && col <= 6) {
+                if (row >= 1 && row <= this.playableArea && col >= 1 && col <= this.playableArea) {
                     type = NUMBER_CARD;
-                } else if (row === 7 && col === 0) {
+                } else if (row === BOARD_SIZE - 1 && col === 0) {
                     type = START_CARD;
-                } else if (row === 0 && col === 7) {
+                } else if (row === 0 && col === BOARD_SIZE - 1) {
                     type = FINISH_CARD;
                 }
 

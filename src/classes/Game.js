@@ -8,7 +8,7 @@ import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
 import { InputController } from "./InputController";
 import { isPointInsideRect } from "../utils/geometry";
-import { startAmbience, stopAmbience } from "../ambience";
+import { playErrorSound, startAmbience, stopAmbience } from "../ambience";
 
 export class Game {
     constructor() {
@@ -465,8 +465,8 @@ export class Game {
         }
 
         this.board.placeCard(cell.row, cell.col, card);
+        this.endGame(true);
 
-        // show win screen & end game
         return true;
     }
 
@@ -610,6 +610,12 @@ export class Game {
         this.status = won ? GAME_WON : GAME_LOST;
         this.action = null;
         this.input.cancelDrag();
+
+        if (won) {
+            playVictorySound();
+        } else {
+            playErrorSound();
+        }
 
         stopAmbience();
 

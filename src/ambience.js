@@ -174,6 +174,49 @@ export async function playErrorSound() {
     osc.stop(time + 0.23);
 }
 
+export async function playVictorySound() {
+    if (!effectsCtx || !effectsGain) return;
+
+    if (effectsCtx.state === "suspended") {
+        await effectsCtx.resume();
+    }
+
+    const time = effectsCtx.currentTime;
+
+    const notes = [
+        [523.25, 0.00, 0.12],
+        [659.25, 0.10, 0.12],
+        [783.99, 0.20, 0.15],
+        [1046.5, 0.32, 0.35]
+    ];
+
+    notes.forEach(([frequency, start, duration]) => {
+        const osc = effectsCtx.createOscillator();
+        const gain = effectsCtx.createGain();
+
+        const noteTime = time + start;
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(frequency, noteTime);
+
+        gain.gain.setValueAtTime(0.0001, noteTime);
+        gain.gain.exponentialRampToValueAtTime(
+            0.12,
+            noteTime + 0.015
+        );
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            noteTime + duration
+        );
+
+        osc.connect(gain);
+        gain.connect(effectsGain);
+
+        osc.start(noteTime);
+        osc.stop(noteTime + duration + 0.02);
+    });
+}
+
 function createNoiseBuffer(duration) {
     const buffer = ctx.createBuffer(
         1,

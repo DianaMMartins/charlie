@@ -1,5 +1,4 @@
 import { playErrorSound } from "../ambience";
-import { FINISH_CARD, START_CARD } from "../enum/cardTypes.";
 
 export class InputController {
     constructor(game) {
@@ -94,8 +93,6 @@ export class InputController {
                 this.draggedCard
             );
 
-
-
             this.game.board.setHoveredCell(
                 boardCell,
                 valid
@@ -138,7 +135,7 @@ export class InputController {
             if (!this.game.canDropCard(boardCell, this.draggedCard)) {
                 playErrorSound();
                 this.cancelDrag();
-                
+
                 return;
             }
 
