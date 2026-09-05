@@ -1,5 +1,6 @@
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { BOARD_SIZE, BOARD_TILE_SIZE } from "../enum/gameSizes";
+import { addGradientStops, RAINBOW_STOPS, renderRainbowText } from "../utils/canvas";
 
 export class Board {
     constructor() {
@@ -77,12 +78,18 @@ export class Board {
                     ctx.restore();
                 }
 
+                ctx.save();
+
+                ctx.fillStyle = 'white';
+                ctx.fillRect(x, y, this.cellSize, this.cellSize);
+
                 ctx.strokeRect(
                     x,
                     y,
                     this.cellSize,
                     this.cellSize
                 );
+                ctx.restore();
             }
         }
     }
@@ -107,25 +114,8 @@ export class Board {
         const startCell = this.getCell(BOARD_SIZE - 1, 0);
         const finishCell = this.getCell(0, BOARD_SIZE - 1);
 
-        ctx.save();
-
-        ctx.font = "12px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        this.renderSpecialSpace(
-            ctx,
-            startCell,
-            "START"
-        );
-
-        this.renderSpecialSpace(
-            ctx,
-            finishCell,
-            "FINISH"
-        );
-
-        ctx.restore();
+        this.renderSpecialSpace(ctx, startCell, "START");
+        this.renderSpecialSpace(ctx, finishCell, "FINISH");
     }
 
     renderSpecialSpace(ctx, cell, label) {
@@ -134,23 +124,24 @@ export class Board {
             cell.col
         );
 
-        if (cell === this.hoveredCell) {
-            ctx.save();
+        ctx.save();
 
+        if (cell === this.hoveredCell) {
             ctx.fillStyle = this.hoveredCellValid
                 ? "rgb(32, 187, 32)"
                 : "rgb(168, 32, 32)";
-
-            ctx.fillRect(
-                x,
-                y,
-                this.cellSize,
-                this.cellSize
-            );
-
-            ctx.restore();
+        } else {
+            ctx.fillStyle = "white";
         }
 
+        ctx.fillRect(
+            x,
+            y,
+            this.cellSize,
+            this.cellSize
+        );
+
+        ctx.strokeStyle = "black";
         ctx.strokeRect(
             x,
             y,
@@ -158,11 +149,18 @@ export class Board {
             this.cellSize
         );
 
-        ctx.fillText(
+        renderRainbowText(
+            ctx,
             label,
             x + this.cellSize / 2,
-            y + this.cellSize / 2
+            y + this.cellSize / 2,
+            {
+                font: "12px sans-serif",
+                width: this.cellSize
+            }
         );
+
+        ctx.restore();
     }
 
     createCells() {

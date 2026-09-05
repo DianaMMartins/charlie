@@ -154,6 +154,10 @@ export class Player {
     }
 
     renderDeck(ctx) {
+        if (this.deck.length === 0) {
+            return;
+        }
+
         const topCard = this.deck.cards[this.deck.cards.length - 1];
 
         if (topCard) {
@@ -167,7 +171,7 @@ export class Player {
         if (this.discardHovered) {
             ctx.save();
 
-            ctx.fillStyle = "rgb(32, 187, 32)";
+            ctx.fillStyle = "rgb(20, 139, 20)";
 
             ctx.fillRect(
                 this.discardX,
@@ -187,13 +191,13 @@ export class Player {
                 this.discardSize
             );
 
-            this.renderDiscardOverlay(ctx);
+            this.renderDeckOverlay(ctx);
         } else {
             this.drawEmptyDiscard(ctx);
         }
     }
 
-    renderDiscardOverlay(ctx) {
+    renderDeckOverlay(ctx) {
         ctx.save();
 
         const padding = 1;

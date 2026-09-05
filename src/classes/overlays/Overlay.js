@@ -1,12 +1,15 @@
 import { DEFAULT_MARGIN, BOARD_SIZE, BUTTON_H, BUTTON_WIDTH } from "../../enum/gameSizes";
-import { addGradientStops, RAINBOW_STOPS, RAINBOW_TEXT_STOPS } from "../../utils/canvas";
+import { renderRainbowBorder, renderRainbowText } from "../../utils/canvas";
 import { isPointInsideRect } from "../../utils/geometry";
+import { ParticleBackground } from "../ParticleBackground";
 
 export class Overlay {
     constructor() {
         this.active = false;
         this.buttons = {};
         this.gradientAngle = 0;
+
+        this.background = new ParticleBackground();
     }
 
     open() {
@@ -38,8 +41,6 @@ export class Overlay {
 
         const borderWidth = DEFAULT_MARGIN;
 
-        ctx.fillStyle = "#f4e0ff";
-
         ctx.fillRect(
             borderWidth,
             borderWidth,
@@ -47,8 +48,13 @@ export class Overlay {
             height - borderWidth * 2
         );
 
+        this.background.render(
+            ctx,
+            width,
+            height
+        );
 
-        this.renderRainbowBorder(
+        renderRainbowBorder(
             ctx,
             0,
             0,
@@ -60,40 +66,10 @@ export class Overlay {
         ctx.restore();
     }
 
-    renderRainbowBorder(ctx, x, y, width, height, borderWidth) {
-        ctx.save();
-
-        const centerX = width / 2;
-        const centerY = height / 2;
-
-        const gradient = ctx.createConicGradient(
-            this.gradientAngle,
-            centerX,
-            centerY
-        );
-
-        addGradientStops(gradient, RAINBOW_STOPS);
-
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = borderWidth;
-
-        ctx.beginPath();
-
-        ctx.roundRect(
-            borderWidth / 2,
-            borderWidth / 2,
-            width - borderWidth,
-            height - borderWidth,
-        );
-
-        ctx.stroke();
-
-        ctx.restore();
-    }
-
-    renderButton(ctx, x, y, text, enabled = true, id = "button") {
+    renderButton(ctx, x, y, text, enabled = true, id = "button", colour = "black") {
         const buttonWidth = BUTTON_WIDTH;
         const buttonHeight = BUTTON_H;
+        const borderWidth = 3;
 
         const button = {
             x,
@@ -106,10 +82,9 @@ export class Overlay {
 
         ctx.save();
 
-        ctx.fillStyle = enabled ? "black" : "gray";
+        ctx.fillStyle = enabled ? colour : "gray";
 
         ctx.beginPath();
-
         ctx.roundRect(
             button.x,
             button.y,
@@ -119,19 +94,28 @@ export class Overlay {
         );
 
         ctx.fill();
+        ctx.restore();
 
-        ctx.fillStyle = "white";
-        ctx.font = "20px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        ctx.fillText(
-            text,
-            button.x + button.width / 2,
-            button.y + button.height / 2
+        renderRainbowBorder(
+            ctx,
+            button.x,
+            button.y,
+            button.width,
+            button.height,
+            borderWidth,
+            BOARD_SIZE,
+            this.gradientAngle
         );
 
-        ctx.restore();
+        renderRainbowText(
+            ctx,
+            text,
+            button.x + button.width / 2,
+            button.y + button.height / 2,
+            {
+                width: button.width
+            }
+        );
 
         return button;
     }
@@ -141,26 +125,16 @@ export class Overlay {
     }
 
     renderTitle(ctx, width, text, y) {
-        ctx.save();
-
-        const x = width / 2;
-        const gradient = ctx.createLinearGradient(
-            x - 120,
+        renderRainbowText(
+            ctx,
+            text,
+            width / 2,
             y,
-            x + 120,
-            y
+            {
+                font: "42px sans-serif",
+                width: 240
+            }
         );
-
-        addGradientStops(gradient, RAINBOW_TEXT_STOPS);
-
-        ctx.fillStyle = gradient;
-        ctx.font = "42px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        ctx.fillText(text, x, y);
-
-        ctx.restore();
     }
 
     isButtonClicked(x, y, id = "button") {

@@ -9,6 +9,8 @@ import { EndOverlay } from "./overlays/EndOverlay";
 import { InputController } from "./InputController";
 import { isPointInsideRect } from "../utils/geometry";
 import { playErrorSound, startAmbience, stopAmbience } from "../ambience";
+import { ParticleBackground } from "./ParticleBackground";
+import { renderRainbowBorder, renderRainbowText, renderText } from "../utils/canvas";
 
 export class Game {
     constructor() {
@@ -35,6 +37,7 @@ export class Game {
         this.message = "";
 
         this.input = new InputController(this);
+        this.background = new ParticleBackground();
 
         this.audioMuted = false;
         this.audioBtn = null;
@@ -92,6 +95,9 @@ export class Game {
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.background.render(this.ctx, this.canvas.width, this.canvas.height);
+
         this.board.render(this.ctx);
         this.renderMessage();
         this.player.render(this.ctx, this.input.draggedCard);
@@ -132,26 +138,23 @@ export class Game {
     }
 
     renderMessage() {
-        this.ctx.save();
-
-        this.ctx.fillStyle = "black";
-        this.ctx.font = "20px sans-serif";
-        this.ctx.textAlign = "center";
-        this.ctx.textBaseline = "middle";
-
         const lines = this.message.split("\n");
         const lineHeight = 24;
-        const startY = this.messageY - ((lines.length - 1) * lineHeight) / 2;
+        const startY =
+            this.messageY - ((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, index) => {
-            this.ctx.fillText(
+            renderRainbowText(
+                this.ctx,
                 line,
                 this.canvas.width / 2,
-                startY + index * lineHeight
+                startY + index * lineHeight,
+                {
+                    font: "20px sans-serif",
+                    width: 240
+                }
             );
         });
-
-        this.ctx.restore();
     }
 
     renderDraggedCard() {
@@ -167,55 +170,68 @@ export class Game {
     }
 
     renderShowDiscardButton() {
-        if (
-            this.overlay !== this.discardOverlay ||
-            this.discardOverlay.visible
-        ) {
-            return;
-        }
-
-        const width = BUTTON_WIDTH;
-        const height = BUTTON_H;
-
-        const x = this.canvas.width - width - UI_MARGIN;
-        const y = UI_MARGIN;
-
-        this.showDiscardButton = {
-            x,
-            y,
-            width,
-            height
-        };
-
-        this.ctx.save();
-
-        this.ctx.fillStyle = "black";
-
-        this.ctx.beginPath();
-
-        this.ctx.roundRect(
-            x,
-            y,
-            width,
-            height,
-            HAND_CARD_GAP
-        );
-
-        this.ctx.fill();
-
-        this.ctx.fillStyle = "white";
-        this.ctx.font = "20px sans-serif";
-        this.ctx.textAlign = "center";
-        this.ctx.textBaseline = "middle";
-
-        this.ctx.fillText(
-            "Open to Discard!",
-            x + width / 2,
-            y + height / 2
-        );
-
-        this.ctx.restore();
+    if (
+        this.overlay !== this.discardOverlay ||
+        this.discardOverlay.visible
+    ) {
+        return;
     }
+
+    const width = BUTTON_WIDTH;
+    const height = BUTTON_H;
+    const borderWidth = 3;
+
+    const x =
+        this.player.discardX +
+        (this.player.discardSize - width) / 2;
+
+    const y = this.player.discardY - height - UI_MARGIN;
+
+    this.showDiscardButton = {
+        x,
+        y,
+        width,
+        height
+    };
+
+    this.ctx.save();
+
+    this.ctx.fillStyle = "white";
+
+    this.ctx.beginPath();
+    this.ctx.roundRect(
+        x,
+        y,
+        width,
+        height,
+        HAND_CARD_GAP
+    );
+
+    this.ctx.fill();
+
+    this.ctx.restore();
+
+    renderRainbowBorder(
+        this.ctx,
+        x,
+        y,
+        width,
+        height,
+        borderWidth,
+        HAND_CARD_GAP,
+        this.overlay.gradientAngle
+    );
+
+    renderText(
+        this.ctx,
+        "Open to Discard!",
+        x + width / 2,
+        y + height / 2,
+        {
+            fillStyle: "black"
+        }
+    );
+}
 
     isShowDiscardClicked(x, y) {
         if (!this.showDiscardButton) {

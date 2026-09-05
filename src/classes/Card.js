@@ -1,6 +1,6 @@
 import { BOARD_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
 import { CARD_BACK_IMAGE, CARD_FRONT_IMAGE } from "../assets";
-import { addGradientStops, RAINBOW_STOPS } from "../utils/canvas";
+import { renderRainbowBorder, renderRainbowText } from "../utils/canvas";
 
 export class Card {
     constructor(value) {
@@ -18,12 +18,12 @@ export class Card {
 
     renderBack(ctx, x, y, size = CARD_DIMENSIONS) {
         this.renderCardBackImage(ctx, x, y, size);
-        this.renderRainbowBorder(ctx, x, y, size);
+        renderRainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
     }
 
     renderFront(ctx, x, y, size = CARD_DIMENSIONS) {
         this.renderCardFront(ctx, x, y, size);
-        this.renderRainbowBorder(ctx, x, y, size);
+        renderRainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
     }
 
     renderCardBackImage(ctx, x, y, size) {
@@ -33,15 +33,14 @@ export class Card {
         ctx.roundRect(x, y, size, size, BOARD_SIZE);
         ctx.clip();
 
-        const gradient = ctx.createLinearGradient(
+        ctx.fillStyle = "black";
+
+        ctx.fillRect(
             x,
             y,
-            x + size,
-            y
+            size,
+            size
         );
-
-        ctx.fillStyle = "black";
-        ctx.fillRect(x, y, size, size);
 
         ctx.drawImage(
             CARD_BACK_IMAGE,
@@ -91,63 +90,46 @@ export class Card {
         ctx.restore();
     }
 
-    renderCardText(ctx, text, x, y, {
-        font = "20px sans-serif",
-        align = "right",
-        baseline = "top",
-        rainbow = false
-    } = {}) {
+    renderCardText(
+        ctx,
+        text,
+        x,
+        y,
+        {
+            font = "20px sans-serif",
+            align = "right",
+            baseline = "top",
+            rainbow = false
+        } = {}
+    ) {
         ctx.save();
-
-        ctx.font = font;
-        ctx.textAlign = align;
-        ctx.textBaseline = baseline;
 
         if (rainbow) {
-            const gradient = ctx.createLinearGradient(
-                x - 40,
-                y,
+            renderRainbowText(
+                ctx,
+                text,
                 x,
-                y
+                y,
+                {
+                    font,
+                    align,
+                    baseline,
+                    width: 40
+                }
             );
-
-            addGradientStops(gradient, RAINBOW_STOPS);
-
-            ctx.fillStyle = gradient;
         } else {
-            ctx.fillStyle = "black";
+            renderText(
+                ctx,
+                text,
+                x,
+                y,
+                {
+                    font,
+                    align,
+                    baseline
+                }
+            );
         }
-
-        ctx.fillText(text, x, y);
-
-        ctx.restore();
-    }
-
-    renderRainbowBorder(ctx, x, y, size) {
-        ctx.save();
-
-        const gradient = ctx.createLinearGradient(
-            x,
-            y,
-            x + size,
-            y + size
-        );
-
-        addGradientStops(gradient, RAINBOW_STOPS);
-
-        ctx.beginPath();
-
-        ctx.roundRect(
-            x,
-            y,
-            size,
-            size,
-            BOARD_SIZE
-        );
-
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2;
-        ctx.stroke();
 
         ctx.restore();
     }

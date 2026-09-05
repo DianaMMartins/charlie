@@ -74,8 +74,8 @@ export class DiscardOverlay extends Overlay {
         const totalButtonWidth = buttonWidth * 2 + gap;
         const buttonStartX = (width - totalButtonWidth) / 2;
 
-        this.discardButton = this.renderButton(ctx, buttonStartX, buttonY, "Discard", this.selectedCards.length === 8, 'discard');
-        this.hideButton = this.renderButton(ctx, buttonStartX + buttonWidth + gap, buttonY, "Hide", true, 'hide');
+        this.discardButton = this.renderButton(ctx, buttonStartX, buttonY, "Discard", this.selectedCards.length === 8, "discard");
+        this.hideButton = this.renderButton(ctx, buttonStartX + buttonWidth + gap, buttonY, "Hide", true, "hide", "white");
     }
 
     renderCards(ctx, width, startY) {
@@ -129,7 +129,7 @@ export class DiscardOverlay extends Overlay {
     renderSelectedCard(ctx, x, y, size) {
         ctx.save();
 
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = "white";
         ctx.lineWidth = 4;
 
         ctx.beginPath();
