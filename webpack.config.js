@@ -1,35 +1,32 @@
-const path = require("path");
+const path = require('path');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-    mode: "development",
-
-    entry: "./src/main.js",
-
+    mode: 'production',
+    entry: './src/main.js',
     output: {
-        filename: "bundle.js",
-        path: path.resolve(__dirname, "dist"),
-        clean: true,
+        filename: 'main.js',
+        path: path.resolve(__dirname, 'dist'),
+        clean: true
     },
-
+    devServer: {
+        static: './dist',
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: "./src/index.html"
+        })
+    ],
     module: {
         rules: [
             {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                type: "javascript/auto",
+                test: /\.js$/i,
+                exclude: /node_modules/
             },
             {
                 test: /\.svg$/i,
-                type: "asset/resource",
-            },
-        ],
-    },
-
-    devServer: {
-        static: {
-            directory: path.join(__dirname, "src"),
-        },
-        port: 8080,
-        open: true,
-    },
+                type: "asset/resource"
+            }
+        ]
+    }
 };

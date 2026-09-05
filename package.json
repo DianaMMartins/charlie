@@ -1,16 +1,18 @@
 {
   "name": "Over the Rainbow",
+  "author": "Diana Martins",
   "version": "1.0.0",
-  "description": "Card game with unicorns and rainbows",
+  "description": "js13k 2026 card game for unicorns and rainbows",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack serve --mode development",
-    "build": "webpack --mode production",
-    "serve": "npx serve dist"
+    "start": "webpack serve --open",
+    "build": "webpack --config webpack.config.js",
+    "package": "npm run build && node scripts/package.js"
   },
   "keywords": [],
-  "author": "Diana Martins",
   "devDependencies": {
+    "archiver": "^7.0.1",
+    "html-webpack-plugin": "^5.6.8",
     "webpack": "5.109.2",
     "webpack-cli": "7.2.2",
     "webpack-dev-server": "6.0.0"
