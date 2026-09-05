@@ -66,22 +66,29 @@ export class Board {
                 const cell = this.getCell(row, col);
                 const { x, y } = this.getCellPosition(row, col);
 
-                if (cell === this.hoveredCell) {
-                    ctx.save();
-
-                    ctx.fillStyle = this.hoveredCellValid
-                        ? "rgb(32, 187, 32)"
-                        : "rgb(168, 32, 32)";
-
-                    ctx.fillRect(x, y, this.cellSize, this.cellSize);
-
-                    ctx.restore();
-                }
-
                 ctx.save();
 
-                ctx.fillStyle = 'white';
-                ctx.fillRect(x, y, this.cellSize, this.cellSize);
+               if (cell === this.hoveredCell) {
+                ctx.fillStyle = this.hoveredCellValid
+                    ? "rgb(32, 187, 32)"
+                    : "rgb(168, 32, 32)";
+
+                ctx.fillRect(
+                    x,
+                    y,
+                    this.cellSize,
+                    this.cellSize
+                );
+            } else if (!cell.card) {
+                ctx.fillStyle = "white";
+
+                ctx.fillRect(
+                    x,
+                    y,
+                    this.cellSize,
+                    this.cellSize
+                );
+            }
 
                 ctx.strokeRect(
                     x,
@@ -187,9 +194,10 @@ export class Board {
     }
 
     getCellPosition(row, col) {
+        const gap = 4
         return {
-            x: this.x + col * this.cellSize,
-            y: this.y + row * this.cellSize
+            x: this.x + col * (this.cellSize + gap),
+            y: this.y + row * (this.cellSize + gap)
         };
     }
 

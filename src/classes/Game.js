@@ -8,7 +8,7 @@ import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
 import { InputController } from "./InputController";
 import { isPointInsideRect } from "../utils/geometry";
-import { playErrorSound, startAmbience, stopAmbience } from "../ambience";
+import { playErrorSound, playVictorySound, startAmbience, stopAmbience } from "../ambience";
 import { ParticleBackground } from "./ParticleBackground";
 import { renderRainbowBorder, renderRainbowText, renderText } from "../utils/canvas";
 
@@ -627,7 +627,7 @@ export class Game {
         this.action = null;
         this.input.cancelDrag();
 
-        if (won) {
+        if (!won) {
             playVictorySound();
         } else {
             playErrorSound();

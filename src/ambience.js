@@ -184,25 +184,36 @@ export async function playVictorySound() {
     const time = effectsCtx.currentTime;
 
     const notes = [
-        [523.25, 0.00, 0.12],
-        [659.25, 0.10, 0.12],
-        [783.99, 0.20, 0.15],
-        [1046.5, 0.32, 0.35]
+        [523.25, 0.00, 0.16, 0.55],
+        [659.25, 0.10, 0.16, 0.55],
+        [783.99, 0.20, 0.18, 0.55],
+        [1046.50, 0.32, 0.55, 0.70],
+        [783.99, 0.32, 0.55, 0.35],
+        [659.25, 0.32, 0.55, 0.30],
+        [1318.51, 0.68, 0.12, 0.35],
+        [1567.98, 0.78, 0.14, 0.30],
+        [2093.00, 0.90, 0.30, 0.45]
     ];
 
-    notes.forEach(([frequency, start, duration]) => {
+    notes.forEach(([frequency, start, duration, volume], index) => {
+        const noteTime = time + start;
+
         const osc = effectsCtx.createOscillator();
         const gain = effectsCtx.createGain();
 
-        const noteTime = time + start;
+        osc.type = index >= 6 ? "sine" : "triangle";
+        osc.frequency.setValueAtTime(
+            frequency,
+            noteTime
+        );
 
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(frequency, noteTime);
-
-        gain.gain.setValueAtTime(0.0001, noteTime);
+        gain.gain.setValueAtTime(
+            0.0001,
+            noteTime
+        );
         gain.gain.exponentialRampToValueAtTime(
-            0.12,
-            noteTime + 0.015
+            volume,
+            noteTime + 0.025
         );
         gain.gain.exponentialRampToValueAtTime(
             0.0001,
@@ -213,7 +224,7 @@ export async function playVictorySound() {
         gain.connect(effectsGain);
 
         osc.start(noteTime);
-        osc.stop(noteTime + duration + 0.02);
+        osc.stop(noteTime + duration + 0.05);
     });
 }
 
