@@ -19,10 +19,10 @@ export const COMPLETE_BOARD_MSG = 'Board must be full';
 export const PLAY_START_MSG = 'Play Start card then Discard 8 cards';
 
 export const RULES = [
-    "Fill the board with cards in ascending order, from bottom-left to top-right.",
-    "You have 1 Start card and 5 Finish cards.",
-    "Fill the board, then play a Finish card to win.",
-    "Play next to another card? Discard cards equal to the lowest number difference up to 4.",
-    "Play 1 card or discard 2 cards then draw back to 5.",
-    "Run out of cards? Complete the board without being able to play a Finish card? You lose!"
+    "Drag cards to the board in ascending order 1 to 80, follow the arrows",
+    "You get extra 1 Start and 5 Finish cards",
+    "Fill the board, then play Finish card to win",
+    "Drag next to another card? Discard cards equal to the lowest number difference up to 4.",
+    "Play 1 card or discard 2 cards",
+    "Run out of cards? Complete the board but no Finish card? You lose!"
 ];
