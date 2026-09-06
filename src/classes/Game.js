@@ -2,7 +2,7 @@ import { Player } from "./Player";
 import { Board } from "./Board";
 import { BTN_H as BTN_H, BTN_WIDTH as BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
-import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON } from "../enum/gameStatus";
+import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
@@ -11,6 +11,7 @@ import { isPointInsideRect } from "../utils/geometry";
 import { playErrorSound, playVictorySound, startAmbience as startSound, stopAmbience } from "../ambience";
 import { ParticleBackground as Background } from "./Background";
 import { renderRainbowBorder, renderRainbowText, renderText } from "../utils/canvas";
+import { TutorialOverlay } from "./overlays/TutorialOverlay";
 
 export class Game {
     constructor() {
@@ -21,6 +22,7 @@ export class Game {
         this.player = new Player();
 
         this.startOverlay = new StartOverlay();
+        this.tutorialOverlay = new TutorialOverlay();
         this.discardOverlay = new DiscardOverlay(this.player);
         this.endOverlay = new EndOverlay();
 
@@ -29,7 +31,7 @@ export class Game {
         this.layoutGap = UI_MARGIN;
         this.msgHeight = 20;
 
-        this.status = START_GAME;
+        this.status = START;
         this.action = null
 
         this.discardCount = 0;
@@ -61,20 +63,27 @@ export class Game {
         this.overlay = this.startOverlay;
 
         this.startOverlay.open(() => {
-            this.selectGamePlay();
-            this.overlay = null;
+            this.startTutorial();
         });
     }
 
-    selectGamePlay() {
-        this.status = GAME_PLAY;
-        this.action = PLAY_CARD;
-        this.discardCount = 0;
-        this.msg = PLAY_MSG;
+    startTutorial() {
+        this.status = TUTORIAL;
+
+        this.overlay = this.tutorialOverlay;
+
+        this.tutorialOverlay.open(() => {
+            this.selectGamePlay();
+            this.overlay = null;
+        });
 
         if (!this.audioMuted) {
             startSound();
         }
+    }
+
+    selectGamePlay() {
+        this.status = GAME_PLAY;
     }
 
     loop() {
@@ -128,7 +137,7 @@ export class Game {
         this.discardCount = 0;
         this.discardRequired = 0;
 
-        this.status = START_GAME;
+        this.status = START;
         this.action = null;
         this.msg = "";
 
@@ -177,7 +186,6 @@ export class Game {
         ) {
             return;
         }
-
 
         const width = BTN_WIDTH;
         const height = BTN_H;
@@ -299,29 +307,20 @@ export class Game {
     }
 
     canDropCard(cell, card) {
-        if (!card) {
-            return false;
-        }
+        if (!card) return false;
 
         if (card.value === START_CARD) {
-            return (
-                cell.type === START_CARD &&
-                this.action === PLAY_START_CARD
-            );
+            return cell.type === START_CARD &&
+                this.action === PLAY_START_CARD;
         }
 
         if (card.value === FINISH_CARD) {
-            return (
-                cell.type === FINISH_CARD &&
-                this.board.isFull()
-            );
+            return cell.type === FINISH_CARD &&
+                this.board.isFull();
         }
 
         if (typeof card.value === "number") {
-            return (
-                cell.type === NUMBER_CARD &&
-                this.board.validatePlayedCard(cell, card)
-            );
+            return this.canPlayNCard(cell, card);
         }
 
         return false;
@@ -480,20 +479,12 @@ export class Game {
     }
 
     playNCard(cell, card) {
-        if (cell.type !== NUMBER_CARD) {
-            return false;
-        }
+        if (!this.canPlayNCard(cell, card)) return false;
 
-        if (!this.board.validatePlayedCard(cell, card)) {
-            return false;
-        }
-
-        const adjacentCards = this.board.getAdjacentCards(cell);
-        const discardRequired = this.getDiscardRequired(card, adjacentCards);
-
-        if (discardRequired === false) {
-            return false;
-        }
+        const discardRequired = this.getDiscardRequired(
+            card,
+            this.board.getAdjacentCards(cell)
+        );
 
         this.board.placeCard(cell.row, cell.col, card);
 
@@ -508,6 +499,16 @@ export class Game {
         }
 
         return true;
+    }
+
+    canPlayNCard(cell, card) {
+        if (cell.type !== NUMBER_CARD) return false;
+        if (!this.board.validatePlayedCard(cell, card)) return false;
+
+        return this.getDiscardRequired(
+            card,
+            this.board.getAdjacentCards(cell)
+        ) !== false;
     }
 
     getDiscardRequired(card, adjacentCards) {
