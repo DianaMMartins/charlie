@@ -1,14 +1,19 @@
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { BOARD_SIZE, BOARD_TILE_SIZE } from "../enum/gameSizes";
-import { addGradientStops, RAINBOW_STOPS, renderRainbowText } from "../utils/canvas";
+import { renderRainbowText } from "../utils/canvas";
+import { isPointInsideRect } from "../utils/geometry";
 
 export class Board {
     constructor() {
         this.size = BOARD_SIZE;
 
         this.baseCellSize = BOARD_TILE_SIZE;
+        this.baseCellGap = 4;
+
         this.scale = 1;
+
         this.cellSize = BOARD_TILE_SIZE;
+        this.cellGap = this.baseCellGap;
 
         this.width = this.size * this.cellSize;
         this.height = this.size * this.cellSize;
@@ -40,16 +45,16 @@ export class Board {
         this.scale = scale;
 
         this.cellSize = this.baseCellSize * scale;
+        this.cellGap = this.baseCellGap * scale;
 
-        this.width = this.size * this.cellSize;
-        this.height = this.size * this.cellSize;
+        this.width = this.size * this.cellSize + (this.size - 1) * this.cellGap;
+        this.height = this.size * this.cellSize + (this.size - 1) * this.cellGap;
     }
 
     getScale(screenWidth) {
-        return Math.min(
-            1,
-            (screenWidth * 0.9) / (this.size * this.baseCellSize)
-        );
+        const baseWidth = this.size * this.baseCellSize + (this.size - 1) * this.baseCellGap;
+
+        return Math.min(1, (screenWidth * 0.9) / baseWidth);
     }
 
     resize(screenWidth) {
@@ -68,27 +73,27 @@ export class Board {
 
                 ctx.save();
 
-               if (cell === this.hoveredCell) {
-                ctx.fillStyle = this.hoveredCellValid
-                    ? "rgb(32, 187, 32)"
-                    : "rgb(168, 32, 32)";
+                if (cell === this.hoveredCell) {
+                    ctx.fillStyle = this.hoveredCellValid
+                        ? "rgb(32, 187, 32)"
+                        : "rgb(168, 32, 32)";
 
-                ctx.fillRect(
-                    x,
-                    y,
-                    this.cellSize,
-                    this.cellSize
-                );
-            } else if (!cell.card) {
-                ctx.fillStyle = "white";
+                    ctx.fillRect(
+                        x,
+                        y,
+                        this.cellSize,
+                        this.cellSize
+                    );
+                } else if (!cell.card) {
+                    ctx.fillStyle = "white";
 
-                ctx.fillRect(
-                    x,
-                    y,
-                    this.cellSize,
-                    this.cellSize
-                );
-            }
+                    ctx.fillRect(
+                        x,
+                        y,
+                        this.cellSize,
+                        this.cellSize
+                    );
+                }
 
                 ctx.strokeRect(
                     x,
@@ -99,22 +104,6 @@ export class Board {
                 ctx.restore();
             }
         }
-    }
-
-    renderPlayableArea(ctx) {
-        const offset = this.cellSize;
-
-        const x = this.x + offset;
-        const y = this.y + offset;
-
-        const size = this.playableArea * this.cellSize;
-
-        ctx.strokeRect(
-            x,
-            y,
-            size,
-            size
-        )
     }
 
     renderSpecialSpaces(ctx) {
@@ -194,10 +183,9 @@ export class Board {
     }
 
     getCellPosition(row, col) {
-        const gap = 4
         return {
-            x: this.x + col * (this.cellSize + gap),
-            y: this.y + row * (this.cellSize + gap)
+            x: this.x + col * (this.cellSize + this.cellGap),
+            y: this.y + row * (this.cellSize + this.cellGap)
         };
     }
 
@@ -269,11 +257,28 @@ export class Board {
     }
 
     getCellAtPosition(x, y) {
-        const col = Math.floor((x - this.x) / this.cellSize);
-        const row = Math.floor((y - this.y) / this.cellSize);
+        const cellStep = this.cellSize + this.cellGap;
+
+        const col = Math.floor((x - this.x) / cellStep);
+        const row = Math.floor((y - this.y) / cellStep);
+
         const cell = this.getCell(row, col);
 
-        return cell?.type ? cell : null;
+        if (!cell?.type) {
+            return null;
+        }
+
+        const { x: cellX, y: cellY } =
+            this.getCellPosition(row, col);
+
+        const inside = isPointInsideRect(x, y, {
+            x: cellX,
+            y: cellY,
+            width: this.cellSize,
+            height: this.cellSize
+        });
+
+        return inside ? cell : null;
     }
 
     isFull() {

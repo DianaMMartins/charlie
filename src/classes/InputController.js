@@ -40,7 +40,7 @@ export class InputController {
     startDrag(e) {
         const { x, y } = this.getPointerPosition(e);
 
-        if (this.game.isAudioButtonClicked(x, y)) {
+        if (this.game.isAudioBtnClicked(x, y)) {
             this.game.toggleAudio();
             return;
         }
@@ -155,11 +155,11 @@ export class InputController {
         this.game.player.clearDiscardHover();
     }
 
-    isAudioButtonClicked(x, y) {
-        if (!this.audioButton) {
+    isAudioBtnClicked(x, y) {
+        if (!this.audioBtn) {
             return false;
         }
 
-        return isPointInsideRect(x, y, this.audioButton);
+        return isPointInsideRect(x, y, this.audioBtn);
     }
 }

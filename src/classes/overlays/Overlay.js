@@ -1,4 +1,4 @@
-import { DEFAULT_MARGIN, BOARD_SIZE, BUTTON_H, BUTTON_WIDTH } from "../../enum/gameSizes";
+import { DEFAULT_MARGIN, BOARD_SIZE, BTN_H, BTN_WIDTH } from "../../enum/gameSizes";
 import { renderRainbowBorder, renderRainbowText } from "../../utils/canvas";
 import { isPointInsideRect } from "../../utils/geometry";
 import { ParticleBackground } from "../Background";
@@ -6,7 +6,7 @@ import { ParticleBackground } from "../Background";
 export class Overlay {
     constructor() {
         this.active = false;
-        this.buttons = {};
+        this.btns = {};
         this.gradientAngle = 0;
 
         this.background = new ParticleBackground();
@@ -66,19 +66,19 @@ export class Overlay {
         ctx.restore();
     }
 
-    renderButton(ctx, x, y, text, enabled = true, id = "button", colour = "black") {
-        const buttonWidth = BUTTON_WIDTH;
-        const buttonHeight = BUTTON_H;
+    renderBtn(ctx, x, y, text, enabled = true, id = "btn", colour = "black") {
+        const btnWidth = BTN_WIDTH;
+        const btnHeight = BTN_H;
         const borderWidth = 3;
 
-        const button = {
+        const btn = {
             x,
             y,
-            width: buttonWidth,
-            height: buttonHeight
+            width: btnWidth,
+            height: btnHeight
         };
 
-        this.buttons[id] = button;
+        this.btns[id] = btn;
 
         ctx.save();
 
@@ -86,10 +86,10 @@ export class Overlay {
 
         ctx.beginPath();
         ctx.roundRect(
-            button.x,
-            button.y,
-            button.width,
-            button.height,
+            btn.x,
+            btn.y,
+            btn.width,
+            btn.height,
             BOARD_SIZE
         );
 
@@ -98,10 +98,10 @@ export class Overlay {
 
         renderRainbowBorder(
             ctx,
-            button.x,
-            button.y,
-            button.width,
-            button.height,
+            btn.x,
+            btn.y,
+            btn.width,
+            btn.height,
             borderWidth,
             BOARD_SIZE,
             this.gradientAngle
@@ -110,14 +110,14 @@ export class Overlay {
         renderRainbowText(
             ctx,
             text,
-            button.x + button.width / 2,
-            button.y + button.height / 2,
+            btn.x + btn.width / 2,
+            btn.y + btn.height / 2,
             {
-                width: button.width
+                width: btn.width
             }
         );
 
-        return button;
+        return btn;
     }
 
     getCenteredY(height, contentHeight) {
@@ -132,19 +132,18 @@ export class Overlay {
             y,
             {
                 font: "42px sans-serif",
-                width: 240
             }
         );
     }
 
-    isButtonClicked(x, y, id = "button") {
-        const button = this.buttons[id];
+    isBtnClicked(x, y, id = "btn") {
+        const btn = this.btns[id];
 
-        if (!button) {
+        if (!btn) {
             return false;
         }
 
-        return isPointInsideRect(x, y, button);
+        return isPointInsideRect(x, y, btn);
     }
 
     handleClick(x, y) {

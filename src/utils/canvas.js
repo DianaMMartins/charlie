@@ -59,8 +59,7 @@ export function renderRainbowText(
     {
         font = "20px sans-serif",
         align = "center",
-        baseline = "middle",
-        width = 100
+        baseline = "middle"
     } = {}
 ) {
     ctx.save();
@@ -69,17 +68,27 @@ export function renderRainbowText(
     ctx.textAlign = align;
     ctx.textBaseline = baseline;
 
+    const textWidth = ctx.measureText(text).width;
+
     const gradient = ctx.createLinearGradient(
-        x - width / 2,
+        x - textWidth / 2,
         y,
-        x + width / 2,
+        x + textWidth / 2,
         y
     );
 
-    addGradientStops(gradient, RAINBOW_TEXT_STOPS);
+    addGradientStops(
+        gradient,
+        RAINBOW_TEXT_STOPS
+    );
 
     ctx.fillStyle = gradient;
-    ctx.fillText(text, x, y);
+
+    ctx.fillText(
+        text,
+        x,
+        y
+    );
 
     ctx.restore();
 }
@@ -123,4 +132,24 @@ export function renderRainbowBorder(
     ctx.stroke();
 
     ctx.restore();
+}
+
+export function getResponsiveFontSize(
+    width,
+    baseSize,
+    {
+        baseWidth = 800,
+        minSize = baseSize,
+        maxSize = baseSize
+    } = {}
+) {
+    const scale = width / baseWidth;
+
+    return Math.max(
+        minSize,
+        Math.min(
+            maxSize,
+            baseSize * scale
+        )
+    );
 }

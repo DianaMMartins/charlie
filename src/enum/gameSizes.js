@@ -1,7 +1,7 @@
 export const UI_MARGIN = 30;
 export const DEFAULT_MARGIN = 40;
 
-export const BUTTON_H = 50;
+export const BTN_H = 50;
 
 export const GAME_WIDTH = 1200;
 export const GAME_HEIGHT = 760;
@@ -22,4 +22,4 @@ export const HAND_CARD_GAP = 10;
 export const DECK_X = DEFAULT_MARGIN;
 export const Y = 650;
 
-export const BUTTON_WIDTH = 180;
+export const BTN_WIDTH = 180;

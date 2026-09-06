@@ -40,9 +40,8 @@ export class Player {
         this.discardHovered = false;
     }
 
-    setLayout(gameWidth, gameHeight, y) {
+    setLayout(gameWidth, y) {
         this.width = gameWidth;
-        this.height = gameHeight;
 
         const handWidth = this.getMaxHandWidth();
         const totalWidth =
@@ -56,20 +55,15 @@ export class Player {
 
         this.deckX = startX;
 
-        this.handX =
-            startX +
-            this.cardSize +
-            this.uiMargin;
+        this.handX = startX + this.cardSize + this.uiMargin;
 
-        this.discardX =
-            this.handX +
-            handWidth +
-            this.uiMargin;
+        this.discardX = this.handX + handWidth + this.uiMargin;
 
         this.deckY = y;
         this.handY = y;
         this.discardY = y;
     }
+
     setScale(scale) {
         this.scale = scale;
 
@@ -244,14 +238,8 @@ export class Player {
         );
     }
 
-    getX(handWidth) {
-        const totalWidth = this.cardSize + this.uiMargin + handWidth + this.uiMargin + this.cardSize;
-
-        return (this.width - totalWidth) / 2;
-    }
-
     getMaxHandWidth() {
-        return this.cardSize * 5 + this.cardGap * 4;
+        return this.cardSize * HAND_SIZE + (HAND_SIZE - 1) * this.cardGap;
     }
 
     drawCards(amount) {

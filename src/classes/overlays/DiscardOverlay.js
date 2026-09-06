@@ -1,4 +1,4 @@
-import { BUTTON_H, BUTTON_WIDTH, DEFAULT_MARGIN, UI_MARGIN } from "../../enum/gameSizes";
+import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN, UI_MARGIN } from "../../enum/gameSizes";
 import { isPointInsideRect } from "../../utils/geometry";
 import { Overlay } from "./Overlay";
 
@@ -48,17 +48,17 @@ export class DiscardOverlay extends Overlay {
 
         const titleHeight = DEFAULT_MARGIN;
         const gap = UI_MARGIN;
-        const buttonHeight = BUTTON_H;
+        const btnHeight = BTN_H;
 
         const rows = Math.ceil(this.player.hand.length / this.columns);
         const cardsHeight = rows * this.player.cardSize + (rows - 1) * this.gap;
 
-        const totalHeight = titleHeight + gap + cardsHeight + gap + buttonHeight;
+        const totalHeight = titleHeight + gap + cardsHeight + gap + btnHeight;
         const startY = this.getCenteredY(height, totalHeight);
 
         const titleY = startY + titleHeight / 2;
         const cardsY = startY + titleHeight + gap;
-        const buttonY = cardsY + cardsHeight + gap;
+        const btnY = cardsY + cardsHeight + gap;
 
 
         this.renderTitle(
@@ -69,13 +69,13 @@ export class DiscardOverlay extends Overlay {
         );
         this.renderCards(ctx, width, cardsY);
 
-        const buttonWidth = BUTTON_WIDTH;
+        const btnWidth = BTN_WIDTH;
 
-        const totalButtonWidth = buttonWidth * 2 + gap;
-        const buttonStartX = (width - totalButtonWidth) / 2;
+        const totalBtnWidth = btnWidth * 2 + gap;
+        const btnStartX = (width - totalBtnWidth) / 2;
 
-        this.discardButton = this.renderButton(ctx, buttonStartX, buttonY, "Discard", this.selectedCards.length === 8, "discard");
-        this.hideButton = this.renderButton(ctx, buttonStartX + buttonWidth + gap, buttonY, "Hide", true, "hide", "white");
+        this.discardBtn = this.renderBtn(ctx, btnStartX, btnY, "Discard", this.selectedCards.length === 8, "discard");
+        this.hideBtn = this.renderBtn(ctx, btnStartX + btnWidth + gap, btnY, "Hide", true, "hide", "white");
     }
 
     renderCards(ctx, width, startY) {
@@ -170,12 +170,12 @@ export class DiscardOverlay extends Overlay {
             }
         }
 
-        if (isPointInsideRect(x, y, this.hideButton)) {
+        if (isPointInsideRect(x, y, this.hideBtn)) {
             this.hide();
             return true;
         }
 
-        if (isPointInsideRect(x, y, this.discardButton)) {
+        if (isPointInsideRect(x, y, this.discardBtn)) {
             if (this.selectedCards.length !== 8) {
                 return true;
             }

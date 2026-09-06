@@ -1,6 +1,6 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { BUTTON_H as BTN_H, BUTTON_WIDTH as BTN_WIDTH, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
+import { BTN_H as BTN_H, BTN_WIDTH as BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
@@ -151,7 +151,6 @@ export class Game {
                 startY + index * lineHeight,
                 {
                     font: "20px sans-serif",
-                    width: 240
                 }
             );
         });
@@ -170,12 +169,15 @@ export class Game {
     }
 
     renderOpenDiscardBtn() {
+        this.showDiscardBtn = null;
+
         if (
             this.overlay !== this.discardOverlay ||
             this.discardOverlay.visible
         ) {
             return;
         }
+
 
         const width = BTN_WIDTH;
         const height = BTN_H;
@@ -278,9 +280,7 @@ export class Game {
     }
 
     layoutBoard(startY) {
-        this.board.x =
-            (this.canvas.width - this.board.width) / 2;
-
+        this.board.x = (this.canvas.width - this.board.width) / 2;
         this.board.y = startY;
     }
 
@@ -293,16 +293,9 @@ export class Game {
     }
 
     layoutPlayer() {
-        const playerY =
-            this.msgY +
-            this.msgHeight / 2 +
-            this.layoutGap;
+        const playerY = this.msgY + this.msgHeight / 2 + this.layoutGap;
 
-        this.player.setLayout(
-            this.canvas.width,
-            this.canvas.height,
-            playerY
-        );
+        this.player.setLayout(this.canvas.width, playerY);
     }
 
     canDropCard(cell, card) {
@@ -529,13 +522,13 @@ export class Game {
     }
 
     renderAudioBtn(ctx) {
-        const size = 44;
-        const margin = 12;
+        const size = DEFAULT_MARGIN;
+        const margin = HAND_CARD_GAP;
 
         const x = this.canvas.width - size - margin;
         const y = margin;
 
-        this.audioButton = {
+        this.audioBtn = {
             x,
             y,
             width: size,
@@ -550,26 +543,26 @@ export class Game {
         ctx.roundRect(x, y, size, size, 8);
         ctx.fill();
 
-        ctx.fillStyle = "white";
-        ctx.font = "22px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        ctx.fillText(
+        renderText(
+            ctx,
             this.audioMuted ? "🔇" : "🔊",
             x + size / 2,
-            y + size / 2
+            y + size / 2,
+            {
+                font: "22px sans-serif",
+                fillStyle: "white"
+            }
         );
 
         ctx.restore();
     }
 
-    isAudioButtonClicked(x, y) {
-        if (!this.audioButton) {
+    isAudioBtnClicked(x, y) {
+        if (!this.audioBtn) {
             return false;
         }
 
-        return isPointInsideRect(x, y, this.audioButton);
+        return isPointInsideRect(x, y, this.audioBtn);
     }
 
     toggleAudio() {

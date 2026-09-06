@@ -102,8 +102,6 @@ export class Card {
             rainbow = false
         } = {}
     ) {
-        ctx.save();
-
         if (rainbow) {
             renderRainbowText(
                 ctx,
@@ -114,7 +112,6 @@ export class Card {
                     font,
                     align,
                     baseline,
-                    width: 40
                 }
             );
         } else {
@@ -130,7 +127,5 @@ export class Card {
                 }
             );
         }
-
-        ctx.restore();
     }
 }
