@@ -11,7 +11,7 @@ export const REQUIRED_DISCARD = 5;
 export const GAME_WON = 6;
 export const GAME_LOST = 7;
 
-export const PLAY_MSG = 'Play 1 card or Discard 2 cards';
+export const PLAY_MSG = 'Drag 1 card to board to Play or drag 2 cards to discard';
 export const DISCARD_MSG = 'Discard another card';
 
 export const COMPLETE_BOARD_MSG = 'Board must be full';

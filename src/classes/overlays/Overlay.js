@@ -1,7 +1,7 @@
 import { DEFAULT_MARGIN, BOARD_SIZE, BUTTON_H, BUTTON_WIDTH } from "../../enum/gameSizes";
 import { renderRainbowBorder, renderRainbowText } from "../../utils/canvas";
 import { isPointInsideRect } from "../../utils/geometry";
-import { ParticleBackground } from "../ParticleBackground";
+import { ParticleBackground } from "../Background";
 
 export class Overlay {
     constructor() {

@@ -1,6 +1,6 @@
 import { BOARD_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
 import { CARD_BACK_IMAGE, CARD_FRONT_IMAGE } from "../assets";
-import { renderRainbowBorder, renderRainbowText } from "../utils/canvas";
+import { renderRainbowBorder as rainbowBorder, renderRainbowText, renderText } from "../utils/canvas";
 
 export class Card {
     constructor(value) {
@@ -17,16 +17,16 @@ export class Card {
     }
 
     renderBack(ctx, x, y, size = CARD_DIMENSIONS) {
-        this.renderCardBackImage(ctx, x, y, size);
-        renderRainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
+        this.renderCardBackImg(ctx, x, y, size);
+        rainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
     }
 
     renderFront(ctx, x, y, size = CARD_DIMENSIONS) {
         this.renderCardFront(ctx, x, y, size);
-        renderRainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
+        rainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
     }
 
-    renderCardBackImage(ctx, x, y, size) {
+    renderCardBackImg(ctx, x, y, size) {
         ctx.save();
 
         ctx.beginPath();
@@ -77,7 +77,7 @@ export class Card {
 
         const textPadding = size * 0.05;
 
-        this.renderCardText(
+        this.renderTxt(
             ctx,
             this.value,
             x + size - textPadding,
@@ -90,7 +90,7 @@ export class Card {
         ctx.restore();
     }
 
-    renderCardText(
+    renderTxt(
         ctx,
         text,
         x,

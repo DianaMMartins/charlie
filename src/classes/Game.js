@@ -1,6 +1,6 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { BUTTON_H, BUTTON_WIDTH, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
+import { BUTTON_H as BTN_H, BUTTON_WIDTH as BTN_WIDTH, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
 import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { START_GAME, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
@@ -8,8 +8,8 @@ import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
 import { InputController } from "./InputController";
 import { isPointInsideRect } from "../utils/geometry";
-import { playErrorSound, playVictorySound, startAmbience, stopAmbience } from "../ambience";
-import { ParticleBackground } from "./ParticleBackground";
+import { playErrorSound, playVictorySound, startAmbience as startSound, stopAmbience } from "../ambience";
+import { ParticleBackground as Background } from "./Background";
 import { renderRainbowBorder, renderRainbowText, renderText } from "../utils/canvas";
 
 export class Game {
@@ -27,17 +27,17 @@ export class Game {
         this.overlay = null;
 
         this.layoutGap = UI_MARGIN;
-        this.messageHeight = 20;
+        this.msgHeight = 20;
 
         this.status = START_GAME;
         this.action = null
 
         this.discardCount = 0;
         this.discardRequired = 0;
-        this.message = "";
+        this.msg = "";
 
         this.input = new InputController(this);
-        this.background = new ParticleBackground();
+        this.background = new Background();
 
         this.audioMuted = false;
         this.audioBtn = null;
@@ -52,12 +52,12 @@ export class Game {
     }
 
     start() {
-        this.openStartOverlay();
+        this.openStart();
 
         this.loop();
     }
 
-    openStartOverlay() {
+    openStart() {
         this.overlay = this.startOverlay;
 
         this.startOverlay.open(() => {
@@ -70,10 +70,10 @@ export class Game {
         this.status = GAME_PLAY;
         this.action = PLAY_CARD;
         this.discardCount = 0;
-        this.message = PLAY_MSG;
+        this.msg = PLAY_MSG;
 
         if (!this.audioMuted) {
-            startAmbience();
+            startSound();
         }
     }
 
@@ -99,10 +99,10 @@ export class Game {
         this.background.render(this.ctx, this.canvas.width, this.canvas.height);
 
         this.board.render(this.ctx);
-        this.renderMessage();
+        this.renderMsg();
         this.player.render(this.ctx, this.input.draggedCard);
 
-        this.renderDraggedCard();
+        this.renderDragCard();
 
         if (this.overlay) {
             this.overlay.render(
@@ -112,8 +112,8 @@ export class Game {
             );
         }
 
-        this.renderShowDiscardButton();
-        this.renderAudioButton(this.ctx);
+        this.renderOpenDiscardBtn();
+        this.renderAudioBtn(this.ctx);
     }
 
     restart() {
@@ -130,18 +130,18 @@ export class Game {
 
         this.status = START_GAME;
         this.action = null;
-        this.message = "";
+        this.msg = "";
 
         this.resize();
 
-        this.openStartOverlay();
+        this.openStart();
     }
 
-    renderMessage() {
-        const lines = this.message.split("\n");
+    renderMsg() {
+        const lines = this.msg.split("\n");
         const lineHeight = 24;
         const startY =
-            this.messageY - ((lines.length - 1) * lineHeight) / 2;
+            this.msgY - ((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, index) => {
             renderRainbowText(
@@ -157,7 +157,7 @@ export class Game {
         });
     }
 
-    renderDraggedCard() {
+    renderDragCard() {
         if (!this.input.draggedCard) {
             return;
         }
@@ -169,76 +169,76 @@ export class Game {
         )
     }
 
-    renderShowDiscardButton() {
-    if (
-        this.overlay !== this.discardOverlay ||
-        this.discardOverlay.visible
-    ) {
-        return;
+    renderOpenDiscardBtn() {
+        if (
+            this.overlay !== this.discardOverlay ||
+            this.discardOverlay.visible
+        ) {
+            return;
+        }
+
+        const width = BTN_WIDTH;
+        const height = BTN_H;
+        const borderWidth = 3;
+
+        const x =
+            this.player.discardX +
+            (this.player.discardSize - width) / 2;
+
+        const y = this.player.discardY - height - UI_MARGIN;
+
+        this.showDiscardBtn = {
+            x,
+            y,
+            width,
+            height
+        };
+
+        this.ctx.save();
+
+        this.ctx.fillStyle = "white";
+
+        this.ctx.beginPath();
+        this.ctx.roundRect(
+            x,
+            y,
+            width,
+            height,
+            HAND_CARD_GAP
+        );
+
+        this.ctx.fill();
+
+        this.ctx.restore();
+
+        renderRainbowBorder(
+            this.ctx,
+            x,
+            y,
+            width,
+            height,
+            borderWidth,
+            HAND_CARD_GAP,
+            this.overlay.gradientAngle
+        );
+
+        renderText(
+            this.ctx,
+            "Open to Discard!",
+            x + width / 2,
+            y + height / 2,
+            {
+                fillStyle: "black"
+            }
+        );
     }
 
-    const width = BUTTON_WIDTH;
-    const height = BUTTON_H;
-    const borderWidth = 3;
-
-    const x =
-        this.player.discardX +
-        (this.player.discardSize - width) / 2;
-
-    const y = this.player.discardY - height - UI_MARGIN;
-
-    this.showDiscardButton = {
-        x,
-        y,
-        width,
-        height
-    };
-
-    this.ctx.save();
-
-    this.ctx.fillStyle = "white";
-
-    this.ctx.beginPath();
-    this.ctx.roundRect(
-        x,
-        y,
-        width,
-        height,
-        HAND_CARD_GAP
-    );
-
-    this.ctx.fill();
-
-    this.ctx.restore();
-
-    renderRainbowBorder(
-        this.ctx,
-        x,
-        y,
-        width,
-        height,
-        borderWidth,
-        HAND_CARD_GAP,
-        this.overlay.gradientAngle
-    );
-
-    renderText(
-        this.ctx,
-        "Open to Discard!",
-        x + width / 2,
-        y + height / 2,
-        {
-            fillStyle: "black"
-        }
-    );
-}
-
     isShowDiscardClicked(x, y) {
-        if (!this.showDiscardButton) {
+        if (!this.showDiscardBtn) {
             return false;
         }
 
-        return isPointInsideRect(x, y, this.showDiscardButton);
+        return isPointInsideRect(x, y, this.showDiscardBtn);
     }
 
     resize() {
@@ -258,7 +258,7 @@ export class Game {
         const startY = this.getLayoutStartY();
 
         this.layoutBoard(startY);
-        this.layoutMessage();
+        this.layoutMsg();
         this.layoutPlayer();
     }
 
@@ -271,7 +271,7 @@ export class Game {
     getLayoutHeight() {
         return (
             this.board.height +
-            this.messageHeight +
+            this.msgHeight +
             this.player.cardSize +
             this.layoutGap * 2
         );
@@ -284,18 +284,18 @@ export class Game {
         this.board.y = startY;
     }
 
-    layoutMessage() {
-        this.messageY =
+    layoutMsg() {
+        this.msgY =
             this.board.y +
             this.board.height +
             this.layoutGap +
-            this.messageHeight / 2;
+            this.msgHeight / 2;
     }
 
     layoutPlayer() {
         const playerY =
-            this.messageY +
-            this.messageHeight / 2 +
+            this.msgY +
+            this.msgHeight / 2 +
             this.layoutGap;
 
         this.player.setLayout(
@@ -361,7 +361,7 @@ export class Game {
         }
 
         if (this.discardRequired > 0) {
-            this.message = `Discard ${this.discardRequired} cards`;
+            this.msg = `Discard ${this.discardRequired} cards`;
             this.action = REQUIRED_DISCARD;
             this.input.cancelDrag();
 
@@ -401,7 +401,7 @@ export class Game {
             } else {
                 const remaining = this.discardRequired - this.discardCount;
 
-                this.message = `Discard ${remaining} cards`;
+                this.msg = `Discard ${remaining} cards`;
 
                 this.input.cancelDrag();
             }
@@ -414,7 +414,7 @@ export class Game {
         if (this.discardCount === 2) {
             this.endTurn();
         } else {
-            this.message = DISCARD_MSG;
+            this.msg = DISCARD_MSG;
             this.input.cancelDrag();
         }
 
@@ -475,7 +475,7 @@ export class Game {
         }
 
         if (!this.board.isFull()) {
-            this.message = COMPLETE_BOARD_MSG + "\n" + PLAY_MSG;
+            this.msg = COMPLETE_BOARD_MSG + "\n" + PLAY_MSG;
 
             return false;
         }
@@ -509,7 +509,7 @@ export class Game {
 
         if (discardRequired > 0) {
             this.action = REQUIRED_DISCARD;
-            this.message = `Discard ${discardRequired} cards`;
+            this.msg = `Discard ${discardRequired} cards`;
         } else {
             this.action = PLAY_CARD;
         }
@@ -518,31 +518,17 @@ export class Game {
     }
 
     getDiscardRequired(card, adjacentCards) {
-        let discardRequired = 0;
-        let smallestDif = 0;
+        let discard = 0;
 
-        for (const adjacentCard of adjacentCards) {
-            const difference = this.board.getCardDifference(card, adjacentCard);
-
-            if (smallestDif > difference || smallestDif === 0) {
-                smallestDif = difference;
-            }
-
+        for (const c of adjacentCards) {
+            const x = this.board.getCardDifference(card, c);
+            if (!discard || x < discard) discard = x;
         }
 
-        if (smallestDif > 4) {
-            return false;
-        }
-
-        discardRequired = Math.max(
-            discardRequired,
-            smallestDif
-        );
-
-        return discardRequired;
+        return discard > 4 ? false : discard;
     }
 
-    renderAudioButton(ctx) {
+    renderAudioBtn(ctx) {
         const size = 44;
         const margin = 12;
 
@@ -592,7 +578,7 @@ export class Game {
         if (this.audioMuted) {
             stopAmbience();
         } else if (this.status === GAME_PLAY) {
-            startAmbience();
+            startSound();
         }
     }
 
@@ -613,13 +599,13 @@ export class Game {
 
         if (isStartDrawn) {
             this.action = PLAY_START_CARD;
-            this.message = PLAY_START_MSG;
+            this.msg = PLAY_START_MSG;
 
             return;
         }
 
         this.action = PLAY_CARD;
-        this.message = PLAY_MSG;
+        this.msg = PLAY_MSG;
     }
 
     endGame(won) {
@@ -627,7 +613,7 @@ export class Game {
         this.action = null;
         this.input.cancelDrag();
 
-        if (!won) {
+        if (won) {
             playVictorySound();
         } else {
             playErrorSound();
