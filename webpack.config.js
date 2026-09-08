@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
     mode: 'production',
@@ -27,6 +28,32 @@ module.exports = {
                 test: /\.svg$/i,
                 type: "asset/resource"
             }
+        ]
+    },
+    optimization: {
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+                parallel: true,
+
+                terserOptions: {
+                    mangle: {
+                        properties: {
+                            regex: /^_/,
+                            keep_quoted: true
+                        }
+                    },
+
+                    compress: {
+                        passes: 4,
+                        pure_getters: true
+                    },
+
+                    output: {
+                        wrap_func_args: false
+                    }
+                }
+            })
         ]
     }
 };
