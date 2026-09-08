@@ -1,11 +1,4 @@
-import {
-    BTN_H,
-    BTN_WIDTH,
-    DEFAULT_MARGIN,
-    HAND_CARD_GAP,
-    UI_MARGIN
-} from "../../enum/gameSizes";
-import { RULES } from "../../enum/gameStatus";
+import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN } from "../../enum/gameSizes";
 import { Overlay } from "./Overlay";
 
 export class StartOverlay extends Overlay {
@@ -28,43 +21,21 @@ export class StartOverlay extends Overlay {
 
         super.render(ctx, width, height);
 
-        const titleHeight = DEFAULT_MARGIN;
         const gap = DEFAULT_MARGIN;
-        const ruleGap = HAND_CARD_GAP;
-        const lineHeight = UI_MARGIN;
-        const pWidth = width * 0.7;
-
-        const titleFontSize = DEFAULT_MARGIN;
-        const bodyFontSize = 16;
-
-        const boardSize = BTN_WIDTH;
-        const boardGap = 4;
-
-        const totalHeight =
-            titleHeight +
-            gap +
-            boardSize +
-            gap +
-            BTN_H;
-
-        let y = this.getCenteredY(height, totalHeight);
+        const totalHeight = DEFAULT_MARGIN + gap + BTN_H;
+        const y = this.getCenteredY(height, totalHeight);
 
         this.renderTitle(
             ctx,
             width,
             "Over the Rainbow",
-            y + titleHeight / 2,
-            titleFontSize
+            y + DEFAULT_MARGIN / 2
         );
-
-        y += titleHeight + gap;
-
-              const btnX = (width - BTN_WIDTH) / 2;
 
         this.renderBtn(
             ctx,
-            btnX,
-            y + gap,
+            (width - BTN_WIDTH) / 2,
+            y + DEFAULT_MARGIN + gap,
             "Start"
         );
     }

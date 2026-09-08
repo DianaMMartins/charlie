@@ -5,8 +5,6 @@ export class ParticleBackground {
     }
     
     addParticle(width, height) {
-        const speed = 0.4 + Math.random() * 1.2;
-
         const particle = {
             x: Math.random() * width,
             y: Math.random() * height,

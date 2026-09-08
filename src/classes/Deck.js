@@ -1,5 +1,5 @@
 import { FINISH_CARD, START_CARD } from "../enum/cardTypes.";
-import { NUMBER_CARDS, CARD_DIMENSIONS } from "../enum/gameSizes";
+import { NUMBER_CARDS } from "../enum/gameSizes";
 import { Card } from "./Card";
 
 export class Deck {

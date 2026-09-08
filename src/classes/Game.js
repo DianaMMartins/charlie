@@ -1,7 +1,6 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { ANGLE, BTN_H as BTN_H, BTN_WIDTH as BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";
-import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
+import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
 import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL, DRAW_CARDS } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
@@ -38,7 +37,6 @@ export class Game {
         this.discardRequired = 0;
 
         this.lastPlayedCard = null;
-        this.lastPlayedCell = null;
 
         this.msg = "";
 
@@ -128,7 +126,7 @@ export class Game {
 
         this.renderOpenDiscardBtn();
         this.renderDrawBtn();
-        this.renderAudioBtn(this.ctx);
+        this.renderAudioBtn();
     }
 
     restart() {
@@ -491,7 +489,6 @@ export class Game {
 
         this.board.placeCard(cell.row, cell.col, card);
         this.lastPlayedCard = card;
-        this.lastPlayedCell = cell;
         this.discardRequired = discardRequired;
         this.discardCount = 0;
 
@@ -568,7 +565,6 @@ export class Game {
         }
 
         this.board.placeCard(cell.row, cell.col, card);
-        this.lastPlayedCell = cell;
         this.input.dragOriginalCell = null;
 
         return true;
@@ -660,7 +656,7 @@ export class Game {
         return isPointInsideRect(x, y, this.drawBtn);
     }
 
-    renderAudioBtn(ctx) {
+    renderAudioBtn() {
         const size = DEFAULT_MARGIN;
         const margin = HAND_CARD_GAP;
 
@@ -674,16 +670,16 @@ export class Game {
             height: size
         };
 
-        ctx.save();
+        this.ctx.save();
 
-        ctx.fillStyle = "black";
+        this.ctx.fillStyle = "black";
 
-        ctx.beginPath();
-        ctx.roundRect(x, y, size, size, 8);
-        ctx.fill();
+        this.ctx.beginPath();
+        this.ctx.roundRect(x, y, size, size, 8);
+        this.ctx.fill();
 
         renderText(
-            ctx,
+            this.ctx,
             this.audioMuted ? "🔇" : "🔊",
             x + size / 2,
             y + size / 2,
@@ -693,7 +689,7 @@ export class Game {
             }
         );
 
-        ctx.restore();
+        this.ctx.restore();
     }
 
     isAudioBtnClicked(x, y) {
