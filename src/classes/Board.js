@@ -318,4 +318,16 @@ export class Board {
         this.hoveredCell = null;
         this.hoveredCellValid = false;
     }
+
+    getCellWithCard(card) {
+        return this.cells.find(cell => cell.card === card);
+    }
+
+    removeCard(cell) {
+        const card = cell.card;
+
+        cell.card = null;
+
+        return card;
+    }
 }

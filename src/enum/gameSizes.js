@@ -23,3 +23,5 @@ export const DECK_X = DEFAULT_MARGIN;
 export const Y = 650;
 
 export const BTN_WIDTH = 180;
+
+export const ANGLE = 0.01;

@@ -6,6 +6,7 @@ export const GAME_PLAY = 'play';
 export const PLAY_START_CARD = 0;
 export const PLAY_CARD = 1;
 export const DISCARD_CARD = 2;
+export const DRAW_CARDS = 3;
 export const DISCARD_START_CARDS = 4;
 export const REQUIRED_DISCARD = 5;
 export const GAME_WON = 6;

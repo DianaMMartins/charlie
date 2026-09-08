@@ -97,7 +97,6 @@ export class Player {
     }
 
     update() {
-        // console.log('update');
     }
 
     render(ctx, draggedCard = null) {

@@ -7,7 +7,6 @@ import {
 } from "../../enum/gameSizes";
 import { RULES } from "../../enum/gameStatus";
 import { Overlay } from "./Overlay";
-import { renderRainbowText, renderText } from "../../utils/canvas";
 
 export class StartOverlay extends Overlay {
     constructor() {

@@ -1,4 +1,5 @@
 import { playErrorSound } from "../ambience";
+import { DRAW_CARDS } from "../enum/gameStatus";
 
 export class InputController {
     constructor(game) {
@@ -6,6 +7,8 @@ export class InputController {
 
         this.draggedCard = null;
         this.dragging = false;
+
+        this.dragOriginalCell = null;
 
         this.dragX = 0;
         this.dragY = 0;
@@ -45,6 +48,11 @@ export class InputController {
             return;
         }
 
+        if (this.game.isDrawBtnClicked(x, y)) {
+            this.game.drawTurnCards();
+            return;
+        }
+
         if (this.game.isShowDiscardClicked(x, y)) {
             this.game.discardOverlay.show();
             return;
@@ -54,6 +62,15 @@ export class InputController {
             this.game.overlay.handleClick(x, y);
             return;
         }
+
+        if (this.game.action === DRAW_CARDS) {
+            if (this.game.startLastCardDrag(x, y)) {
+                this.game.canvas.setPointerCapture(e.pointerId);
+            }
+
+            return;
+        }
+
 
         const card = this.game.player.getCardAtPosition(x, y);
 
@@ -132,10 +149,21 @@ export class InputController {
         const boardCell = this.game.board.getCellAtPosition(x, y);
 
         if (boardCell && boardCell.card === null) {
+            if (this.game.action === DRAW_CARDS) {
+                if (!this.game.moveLastPlayedCard(boardCell)) {
+                    playErrorSound();
+                    this.restoreDraggedCard();
+                    this.cancelDrag();
+                    return;
+                }
+
+                this.cancelDrag();
+                return;
+            }
+
             if (!this.game.canDropCard(boardCell, this.draggedCard)) {
                 playErrorSound();
                 this.cancelDrag();
-
                 return;
             }
 
@@ -147,7 +175,21 @@ export class InputController {
         this.cancelDrag();
     }
 
+    restoreDraggedCard() {
+    if (
+        this.draggedCard &&
+        this.dragOriginalCell &&
+        !this.dragOriginalCell.card
+    ) {
+        this.dragOriginalCell.card = this.draggedCard;
+    }
+
+    this.dragOriginalCell = null;
+}
+
     cancelDrag() {
+        this.restoreDraggedCard();
+
         this.draggedCard = null;
         this.dragging = false;
 
