@@ -1,7 +1,7 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
-import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes";import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
-import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL, DRAW_CARDS } from "../enum/gameStatus";
+import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes"; import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
+import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL, DRAW_CARDS, END, WRONG_PLAY } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
@@ -87,6 +87,7 @@ export class Game {
 
     selectGamePlay() {
         this.status = GAME_PLAY;
+        this.msg = PLAY_MSG;
     }
 
     loop() {
@@ -104,37 +105,83 @@ export class Game {
         this.player.update();
     }
 
-    render() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // render() {
+    //     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.background.render(this.ctx, this.canvas.width, this.canvas.height);
+    //     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    //     this.background.render(this.ctx, this.canvas.width, this.canvas.height);
+
+    //     this.board.render(this.ctx);
+    //     this.renderMsg();
+    //     this.player.render(this.ctx, this.input.draggedCard);
+
+    //     this.renderDragCard();
+
+    //     if (this.overlay) {
+    //         this.overlay.render(
+    //             this.ctx,
+    //             this.canvas.width,
+    //             this.canvas.height
+    //         );
+    //     }
+
+    //     this.renderOpenDiscardBtn();
+    //     this.renderDrawBtn();
+    //     this.renderAudioBtn();
+    // }
+
+    render() {
+        this.ctx.clearRect(
+            0,
+            0,
+            this.canvas.width,
+            this.canvas.height
+        );
+
+        this.ctx.fillRect(
+            0,
+            0,
+            this.canvas.width,
+            this.canvas.height
+        );
+
+        this.background.render(
+            this.ctx,
+            this.canvas.width,
+            this.canvas.height
+        );
 
         this.board.render(this.ctx);
-        this.renderMsg();
         this.player.render(this.ctx, this.input.draggedCard);
 
-        this.renderDragCard();
-
+        // Overlay layer
         if (this.overlay) {
             this.overlay.render(
                 this.ctx,
                 this.canvas.width,
                 this.canvas.height
             );
+        } else {
+            // Normal game UI
+            this.renderMsg();
+            this.renderDragCard();
+            this.renderOpenDiscardBtn();
+            this.renderDrawBtn();
         }
 
-        this.renderOpenDiscardBtn();
-        this.renderDrawBtn();
-        this.renderAudioBtn();
+        // Global UI that should always be on top
+        if (
+            this.status === TUTORIAL ||
+            this.status === GAME_PLAY
+        ) {
+            this.renderAudioBtn();
+        }
     }
 
     restart() {
         this.board = new Board();
         this.player = new Player();
-
-        this.discardOverlay =
-            new DiscardOverlay(this.player);
+        this.discardOverlay = new DiscardOverlay(this.player);
 
         this.overlay = null;
 
@@ -184,12 +231,7 @@ export class Game {
     renderOpenDiscardBtn() {
         this.showDiscardBtn = null;
 
-        if (
-            this.overlay !== this.discardOverlay ||
-            this.discardOverlay.visible
-        ) {
-            return;
-        }
+        if (!this.discardOverlay.wasOpened || this.discardOverlay.visible) return;
 
         const width = BTN_WIDTH;
         const height = BTN_H;
@@ -233,7 +275,7 @@ export class Game {
             height,
             borderWidth,
             HAND_CARD_GAP,
-            this.overlay.gradientAngle
+            this.overlay?.gradientAngle || 0
         );
 
         renderText(
@@ -253,6 +295,11 @@ export class Game {
         }
 
         return isPointInsideRect(x, y, this.showDiscardBtn);
+    }
+
+    openDiscardOverlayFromButton() {
+        this.overlay = this.discardOverlay;
+        this.discardOverlay.show();
     }
 
     resize() {
@@ -319,8 +366,8 @@ export class Game {
         }
 
         if (card.value === FINISH_CARD) {
-            return cell.type === FINISH_CARD &&
-                this.board.isFull();
+            this.msg = WRONG_PLAY;
+            return cell.type === FINISH_CARD && this.board.isFull();
         }
 
         if (typeof card.value === "number") {
@@ -386,7 +433,7 @@ export class Game {
         this.player.discard(card);
         this.discardCount++;
 
-        if (this.player.hand.length === 0) {
+        if (this.player.hand.length === 0 && this.player.deck === 0) {
             this.endGame(false);
             return true;
         }
@@ -451,19 +498,25 @@ export class Game {
     openDiscardOverlay() {
         this.overlay = this.discardOverlay;
 
-        this.discardOverlay.open((selectedCards) => {
-            for (const card of selectedCards) {
-                this.player.discard(card);
+        this.discardOverlay.open(
+            (selectedCards) => {
+                for (const card of selectedCards) {
+                    this.player.discard(card);
+                }
+
+                this.endTurn();
+                this.overlay = null;
+            },
+
+            () => {
+                this.overlay = null;
             }
-
-            this.endTurn();
-
-            this.overlay = null;
-        });
+        );
     }
 
     playFinishCard(cell, card) {
         if (cell.type !== FINISH_CARD) {
+            this.msg = WRONG_PLAY;
             return false;
         }
 
@@ -506,7 +559,7 @@ export class Game {
         if (cell.type !== NUMBER_CARD) {
             return false;
         }
-        
+
         if (!this.board.validatePlayedCard(cell, card)) {
             return false;
         }
@@ -557,8 +610,8 @@ export class Game {
     moveLastPlayedCard(cell) {
         const card = this.input.draggedCard;
 
-        if (this.action !== DRAW_CARDS 
-            || card !== this.lastPlayedCard 
+        if (this.action !== DRAW_CARDS
+            || card !== this.lastPlayedCard
             || !this.canPlayNCard(cell, card)
         ) {
             return false;
@@ -657,6 +710,10 @@ export class Game {
     }
 
     renderAudioBtn() {
+        if (this.action === START) {
+            return;
+        }
+
         const size = DEFAULT_MARGIN;
         const margin = HAND_CARD_GAP;
 

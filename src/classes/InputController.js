@@ -54,7 +54,7 @@ export class InputController {
         }
 
         if (this.game.isShowDiscardClicked(x, y)) {
-            this.game.discardOverlay.show();
+            this.game.openDiscardOverlayFromButton();
             return;
         }
 
@@ -74,9 +74,7 @@ export class InputController {
 
         const card = this.game.player.getCardAtPosition(x, y);
 
-        if (!card) {
-            return;
-        }
+        if (!card) return;
 
         const index = this.game.player.hand.indexOf(card);
 
@@ -176,16 +174,16 @@ export class InputController {
     }
 
     restoreDraggedCard() {
-    if (
-        this.draggedCard &&
-        this.dragOriginalCell &&
-        !this.dragOriginalCell.card
-    ) {
-        this.dragOriginalCell.card = this.draggedCard;
-    }
+        if (
+            this.draggedCard &&
+            this.dragOriginalCell &&
+            !this.dragOriginalCell.card
+        ) {
+            this.dragOriginalCell.card = this.draggedCard;
+        }
 
-    this.dragOriginalCell = null;
-}
+        this.dragOriginalCell = null;
+    }
 
     cancelDrag() {
         this.restoreDraggedCard();

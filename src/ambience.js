@@ -52,9 +52,7 @@ export async function startAmbience() {
         window.webkitAudioContext
     )();
 
-    if (ctx.state === "suspended") {
-        await ctx.resume();
-    }
+    if (ctx.state === "suspended") await ctx.resume();
 
     playing = true;
 
@@ -133,39 +131,22 @@ function playTone(time, frequency, volume) {
     osc.stop(time + duration + 0.1);
 }
 
-export async function playErrorSound() {
+export function playErrorSound() {
     if (!effectsCtx || !effectsGain) return;
-
-    if (effectsCtx.state === "suspended") {
-        await effectsCtx.resume();
-    }
+    if (effectsCtx.state === "suspended") effectsCtx.resume();
 
     const time = effectsCtx.currentTime;
-
     const osc = effectsCtx.createOscillator();
+    const gain = effectsCtx.createGain();
 
     osc.type = "square";
 
     osc.frequency.setValueAtTime(220, time);
-
-    osc.frequency.exponentialRampToValueAtTime(
-        110,
-        time + 0.18
-    );
-
-    const gain = effectsCtx.createGain();
+    osc.frequency.exponentialRampToValueAtTime(110, time + 0.18);
 
     gain.gain.setValueAtTime(0.0001, time);
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.09,
-        time + 0.01
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        time + 0.22
-    );
+    gain.gain.exponentialRampToValueAtTime(0.09, time + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.22);
 
     osc.connect(gain);
     gain.connect(effectsGain);
@@ -174,12 +155,9 @@ export async function playErrorSound() {
     osc.stop(time + 0.23);
 }
 
-export async function playVictorySound() {
+export function playVictorySound() {
     if (!effectsCtx || !effectsGain) return;
-
-    if (effectsCtx.state === "suspended") {
-        await effectsCtx.resume();
-    }
+    if (effectsCtx.state === "suspended") effectsCtx.resume();
 
     const time = effectsCtx.currentTime;
 
@@ -197,28 +175,15 @@ export async function playVictorySound() {
 
     notes.forEach(([frequency, start, duration, volume], index) => {
         const noteTime = time + start;
-
         const osc = effectsCtx.createOscillator();
         const gain = effectsCtx.createGain();
 
         osc.type = index >= 6 ? "sine" : "triangle";
-        osc.frequency.setValueAtTime(
-            frequency,
-            noteTime
-        );
+        osc.frequency.setValueAtTime(frequency,noteTime);
 
-        gain.gain.setValueAtTime(
-            0.0001,
-            noteTime
-        );
-        gain.gain.exponentialRampToValueAtTime(
-            volume,
-            noteTime + 0.025
-        );
-        gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            noteTime + duration
-        );
+        gain.gain.setValueAtTime(0.0001,noteTime);
+        gain.gain.exponentialRampToValueAtTime(volume,noteTime + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001,noteTime + duration);
 
         osc.connect(gain);
         gain.connect(effectsGain);

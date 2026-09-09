@@ -8,7 +8,11 @@ export class DiscardOverlay extends Overlay {
 
         this.player = player;
 
-        this.visible = false
+        this.visible = false;
+        this.wasOpened = false;
+
+        this.onHide = null;
+        this.onDiscard = null;
 
         this.cards = [];
         this.selectedCards = [];
@@ -16,20 +20,20 @@ export class DiscardOverlay extends Overlay {
 
         this.columns = 4;
         this.gap = UI_MARGIN;
-
-        this.onDiscard = null;
     }
 
-    open(onDiscard) {
+    open(onDiscard, onHide) {
         super.open();
 
         this.visible = true;
+        this.wasOpened = true;
 
         this.cards = this.player.hand;
         this.selectedCards = [];
         this.cardPositions = [];
 
         this.onDiscard = onDiscard;
+        this.onHide = onHide;
     }
 
     close() {
@@ -194,6 +198,8 @@ export class DiscardOverlay extends Overlay {
 
     hide() {
         this.visible = false;
+
+        if (this.onHide) this.onHide();
     }
 
     show() {

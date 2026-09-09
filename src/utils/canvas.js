@@ -1,4 +1,4 @@
-const RAINBOW_STOPS = [
+export const RAINBOW_STOPS = [
     [0.00, "#ff5c5c"],
     [0.14, "#ff9f43"],
     [0.28, "#f6d743"],

@@ -16,6 +16,7 @@ export const PLAY_MSG = 'Drag 1 card to Play or discard 2';
 export const DISCARD_MSG = 'Discard another card';
 
 export const COMPLETE_BOARD_MSG = 'Board must be full';
+export const WRONG_PLAY = 'Card must be played in matching area';
 
 export const PLAY_START_MSG = 'Play Start card then Discard 8 cards';
 
