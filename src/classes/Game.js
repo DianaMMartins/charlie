@@ -1,7 +1,7 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
 import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes"; import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
-import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL, DRAW_CARDS, END, WRONG_PLAY, DISCARD } from "../enum/gameStatus";
+import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL, DRAW_CARDS, WRONG_PLAY } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
@@ -204,7 +204,7 @@ export class Game {
     renderOpenDiscardBtn() {
         this.showDiscardBtn = null;
 
-        if (!this.discardOverlay.wasOpened || this.discardOverlay.visible || this.discardOverlay.wasDiscarded) return;
+        if (!this.discardOverlay.wasOpened || this.discardOverlay.visible || this.action !== DISCARD_START_CARDS) return;
 
         const width = BTN_WIDTH;
         const height = BTN_H;

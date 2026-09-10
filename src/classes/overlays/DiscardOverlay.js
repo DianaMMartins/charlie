@@ -11,7 +11,6 @@ export class DiscardOverlay extends Overlay {
 
         this.visible = false;
         this.wasOpened = false;
-        this.wasDiscarded = false;
 
         this.onHide = null;
         this.onDiscard = null;
@@ -190,7 +189,6 @@ export class DiscardOverlay extends Overlay {
                 this.onDiscard(this.selectedCards);
             }
 
-            this.wasDiscarded = true;
             this.close();
 
             return true;
