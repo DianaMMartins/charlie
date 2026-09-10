@@ -1,5 +1,5 @@
 import { playErrorSound } from "../ambience";
-import { DRAW_CARDS } from "../enum/gameStatus";
+import { DISCARD_CARD, DRAW_CARDS, PLAY_CARD, PLAY_START_CARD, REQUIRED_DISCARD } from "../enum/gameStatus";
 
 export class InputController {
     constructor(game) {
@@ -64,13 +64,22 @@ export class InputController {
         }
 
         if (this.game.action === DRAW_CARDS) {
-            if (this.game.startLastCardDrag(x, y)) {
+            this.game.startLastCardDrag(x, y);
+
+            if (this.dragging) {
                 this.game.canvas.setPointerCapture(e.pointerId);
             }
 
             return;
         }
 
+        const canDragHand =
+            this.game.action === PLAY_CARD ||
+            this.game.action === PLAY_START_CARD ||
+            this.game.action === DISCARD_CARD ||
+            this.game.action === REQUIRED_DISCARD;
+
+        if (!canDragHand) return;
 
         const card = this.game.player.getCardAtPosition(x, y);
 
@@ -101,30 +110,35 @@ export class InputController {
         this.dragY = y - this.dragOffsetY;
 
         const boardCell = this.game.board.getCellAtPosition(x, y);
+        const canDiscard = this.game.action === PLAY_CARD || this.game.action === DISCARD_CARD || this.game.action === REQUIRED_DISCARD;
+        const overDiscard = this.game.player.isPointInsideDiscard(x, y);
+
+        this.game.player.setDiscardHovered(canDiscard && overDiscard);
 
         if (boardCell) {
-            const valid = this.game.canDropCard(
-                boardCell,
-                this.draggedCard
-            );
+            let valid = false;
+
+            if (this.game.action === DRAW_CARDS) {
+                valid = this.game.canPlayNCard(
+                    boardCell,
+                    this.draggedCard
+                );
+            } else {
+                valid = this.game.canDropCard(
+                    boardCell,
+                    this.draggedCard
+                );
+            }
 
             this.game.board.setHoveredCell(
                 boardCell,
                 valid
             );
 
-            this.game.player.clearDiscardHover();
-
             return;
         }
 
         this.game.board.clearHoveredCell();
-
-        if (this.game.player.isPointInsideDiscard(x, y)) {
-            this.game.player.setDiscardHovered(true);
-        } else {
-            this.game.player.setDiscardHovered(false);
-        }
     }
 
     endDrag(e) {
@@ -133,6 +147,21 @@ export class InputController {
         }
 
         const { x, y } = this.getPointerPosition(e);
+        if (this.game.action === DRAW_CARDS) {
+            const boardCell = this.game.board.getCellAtPosition(x, y);
+
+            if (
+                boardCell &&
+                this.game.moveLastPlayedCard(boardCell)
+            ) {
+                this.cancelDrag();
+                return;
+            }
+
+            playErrorSound();
+            this.cancelDrag();
+            return;
+        }
 
         const player = this.game.player;
         const discardArea = player.isPointInsideDiscard(x, y);
@@ -147,18 +176,6 @@ export class InputController {
         const boardCell = this.game.board.getCellAtPosition(x, y);
 
         if (boardCell && boardCell.card === null) {
-            if (this.game.action === DRAW_CARDS) {
-                if (!this.game.moveLastPlayedCard(boardCell)) {
-                    playErrorSound();
-                    this.restoreDraggedCard();
-                    this.cancelDrag();
-                    return;
-                }
-
-                this.cancelDrag();
-                return;
-            }
-
             if (!this.game.canDropCard(boardCell, this.draggedCard)) {
                 playErrorSound();
                 this.cancelDrag();

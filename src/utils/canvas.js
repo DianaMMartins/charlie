@@ -23,7 +23,7 @@ export function renderText(
     y,
     {
         font = "20px sans-serif",
-        fillStyle = "black",
+        fillStyle = "white",
         align = "center",
         baseline = "middle"
     } = {}

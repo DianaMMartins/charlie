@@ -1,4 +1,5 @@
 import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN, UI_MARGIN } from "../../enum/gameSizes";
+import { DISCARD } from "../../enum/gameStatus";
 import { isPointInsideRect } from "../../utils/geometry";
 import { Overlay } from "./Overlay";
 
@@ -10,6 +11,7 @@ export class DiscardOverlay extends Overlay {
 
         this.visible = false;
         this.wasOpened = false;
+        this.wasDiscarded = false;
 
         this.onHide = null;
         this.onDiscard = null;
@@ -68,7 +70,7 @@ export class DiscardOverlay extends Overlay {
         this.renderTitle(
             ctx,
             width,
-            "Select 8 cards to discard",
+            "Select 8 cards to " + DISCARD,
             titleY
         );
         this.renderCards(ctx, width, cardsY);
@@ -78,7 +80,7 @@ export class DiscardOverlay extends Overlay {
         const totalBtnWidth = btnWidth * 2 + gap;
         const btnStartX = (width - totalBtnWidth) / 2;
 
-        this.discardBtn = this.renderBtn(ctx, btnStartX, btnY, "Discard", this.selectedCards.length === 8, "discard");
+        this.discardBtn = this.renderBtn(ctx, btnStartX, btnY, DISCARD, this.selectedCards.length === 8, DISCARD);
         this.hideBtn = this.renderBtn(ctx, btnStartX + btnWidth + gap, btnY, "Hide", true, "hide", "white");
     }
 
@@ -188,6 +190,7 @@ export class DiscardOverlay extends Overlay {
                 this.onDiscard(this.selectedCards);
             }
 
+            this.wasDiscarded = true;
             this.close();
 
             return true;

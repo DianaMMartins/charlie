@@ -6,6 +6,8 @@ import {
     DISCARD_DIMENSIONS,
     UI_MARGIN
 } from "../enum/gameSizes";
+import { DISCARD } from "../enum/gameStatus";
+import { renderText } from "../utils/canvas";
 import { isPointInsideRect } from "../utils/geometry";
 import { Deck } from "./Deck";
 
@@ -161,20 +163,16 @@ export class Player {
     renderDiscard(ctx) {
         const card = this.discardPile[this.discardPile.length - 1];
 
-        if (this.discardHovered) {
-            ctx.save();
-
-            ctx.fillStyle = "rgb(20, 139, 20)";
-
-            ctx.fillRect(
-                this.discardX,
-                this.discardY,
-                this.discardSize,
-                this.discardSize
-            );
-
-            ctx.restore();
-        }
+        renderText(
+            ctx,
+            DISCARD,
+            this.discardX + this.discardSize / 2,
+            this.discardY - this.uiMargin / 2,
+            // {
+            //     fillStyle: "white",
+            //     textAlign: "center",
+            // }
+        );
 
         if (card) {
             card.renderBack(
@@ -187,6 +185,22 @@ export class Player {
             this.renderDeckOverlay(ctx);
         } else {
             this.drawEmptyDiscard(ctx);
+        }
+
+        if (this.discardHovered) {
+            ctx.save();
+
+            ctx.fillStyle = "rgb(20, 139, 20)";
+            ctx.beginPath();
+            ctx.roundRect(
+                this.discardX,
+                this.discardY,
+                this.discardSize,
+                this.discardSize,
+                BOARD_SIZE
+            );
+            ctx.fill();
+            ctx.restore();
         }
     }
 
