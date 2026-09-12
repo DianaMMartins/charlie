@@ -360,6 +360,13 @@ export class Game {
         return false;
     }
 
+    isPlayerOutOfCards() {
+        return (
+            this.player.hand.length === 0 &&
+            this.player.deck.cards.length === 0
+        );
+    }
+
     dropCardOnBoard(cell) {
         if (this.action === DISCARD_CARD || this.action === REQUIRED_DISCARD) {
             this.input.cancelDrag();
@@ -378,6 +385,12 @@ export class Game {
         }
 
         this.player.removeCard(card);
+
+        if (this.isPlayerOutOfCards()) {
+            this.endGame(false);
+            return;
+        }
+
 
         if (this.action === DISCARD_START_CARDS) {
             this.discardCount = 0;
@@ -419,6 +432,11 @@ export class Game {
 
         this.discardCount++;
 
+        if (this.isPlayerOutOfCards()) {
+            this.endGame(false);
+            return true;
+        }
+
         if (this.action === REQUIRED_DISCARD) {
             if (this.discardCount >= this.discardRequired) {
                 this.endTurn();
@@ -435,7 +453,7 @@ export class Game {
         if (this.discardCount === 2) {
             this.endTurn();
         } else {
-            if (this.player.hand.length === 0 && this.player.deck.cards.length === 0) {
+            if (this.isPlayerOutOfCards()) {
                 this.endGame(false);
                 return true;
             }
@@ -536,13 +554,7 @@ export class Game {
     }
 
     canPlayNCard(cell, card) {
-        if (cell.type !== NUMBER_CARD) {
-            return false;
-        }
-
-        if (!this.board.validatePlayedCard(cell, card)) {
-            return false;
-        }
+        if (cell.type !== NUMBER_CARD || !this.board.validatePlayedCard(cell, card)) return false;
 
         return this.getDiscardRequired(
             card,
@@ -554,23 +566,17 @@ export class Game {
         if (
             this.action !== DRAW_CARDS ||
             !this.lastPlayedCard
-        ) {
-            return false;
-        }
+        ) return false;
 
         const originalCell = this.board.getCellWithCard(
             this.lastPlayedCard
         );
 
-        if (!originalCell) {
-            return false;
-        }
+        if (!originalCell) return false;
 
         const clickedCell = this.board.getCellAtPosition(x, y);
 
-        if (clickedCell !== originalCell) {
-            return false;
-        }
+        if (clickedCell !== originalCell) return false;
 
         const position = this.board.getCellPosition(
             originalCell.row,
@@ -600,9 +606,7 @@ export class Game {
             this.action !== DRAW_CARDS ||
             card !== this.lastPlayedCard ||
             !cell
-        ) {
-            return false;
-        }
+        ) return false;
 
         if (cell === this.input.dragOriginalCell) {
             this.board.placeCard(
@@ -615,13 +619,9 @@ export class Game {
             return true;
         }
 
-        if (cell.card !== null) {
-            return false;
-        }
+        if (cell.card !== null) return false;
 
-        if (!this.canPlayNCard(cell, card)) {
-            return false;
-        }
+        if (!this.canPlayNCard(cell, card)) return false;
 
         this.board.placeCard(
             cell.row,
@@ -648,7 +648,7 @@ export class Game {
     renderDrawBtn() {
         this.drawBtn = null;
 
-        if (this.action !== DRAW_CARDS || this.isLastHand()) {
+        if (this.action !== DRAW_CARDS || this.isPlayerOutOfCards()) {
             return;
         }
 
@@ -695,22 +695,13 @@ export class Game {
         );
     }
 
-    isLastHand() {
-        return this.player.hand.length <= 5 && this.player.deck.cards.length === 0
-    }
-
     isDrawBtnClicked(x, y) {
-        if (!this.drawBtn) {
-            return false;
-        }
-
+        if (!this.drawBtn) return false;
         return isPointInsideRect(x, y, this.drawBtn);
     }
 
     renderAudioBtn() {
-        if (this.action === START) {
-            return;
-        }
+        if (this.action === START) return;
 
         const size = DEFAULT_MARGIN;
         const margin = HAND_CARD_GAP;
@@ -748,10 +739,7 @@ export class Game {
     }
 
     isAudioBtnClicked(x, y) {
-        if (!this.audioBtn) {
-            return false;
-        }
-
+        if (!this.audioBtn) return false;
         return isPointInsideRect(x, y, this.audioBtn);
     }
 
@@ -769,8 +757,13 @@ export class Game {
         this.discardCount = 0;
         this.discardRequired = 0;
 
+        if (this.isPlayerOutOfCards()) {
+            this.endGame(false);
+            return;
+        }
+
         this.input.cancelDrag();
-        this.action = this.isLastHand() ? PLAY_CARD : DRAW_CARDS;
+        this.action = this.player.hand.length <= 5 && this.player.deck.cards.length === 0 ? PLAY_CARD : DRAW_CARDS;
         this.msg = "";
     }
 
@@ -795,9 +788,7 @@ export class Game {
     }
 
     drawTurnCards() {
-        if (this.action !== DRAW_CARDS) {
-            return;
-        }
+        if (this.action !== DRAW_CARDS) return;
 
         const drawCards = this.player.drawCards(
             HAND_SIZE - this.player.hand.length

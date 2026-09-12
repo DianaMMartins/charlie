@@ -9,7 +9,7 @@ export const BOARD_TILE_SIZE = 69;
 export const CARD_DIMENSIONS = 85;
 export const DISCARD_DIMENSIONS = 75;
 
-export const NUMBER_CARDS = 8;
+export const NUMBER_CARDS = 80;
 export const HAND_SIZE = 5;
 export const HAND_CARD_GAP = 10;
 
