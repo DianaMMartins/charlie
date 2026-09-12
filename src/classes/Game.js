@@ -346,8 +346,11 @@ export class Game {
         }
 
         if (card.value === FINISH_CARD) {
-            this.msg = WRONG_PLAY;
-            return cell.type === FINISH_CARD && this.board.isFull();
+            if (cell.type !== FINISH_CARD) {
+                this.msg = WRONG_PLAY;
+                return false;
+            }
+            return true
         }
 
         if (typeof card.value === "number") {
@@ -412,8 +415,6 @@ export class Game {
 
         this.player.discard(card);
 
-        // A discard means the previously played card should
-        // no longer be repositionable on the next DRAW_CARDS phase.
         this.lastPlayedCard = null;
 
         this.discardCount++;
@@ -500,14 +501,8 @@ export class Game {
     }
 
     playFinishCard(cell, card) {
-        if (cell.type !== FINISH_CARD) {
-            this.msg = WRONG_PLAY;
-            return false;
-        }
-
         if (!this.board.isFull()) {
             this.msg = COMPLETE_BOARD_MSG + "\n" + PLAY_MSG;
-
             return false;
         }
 
