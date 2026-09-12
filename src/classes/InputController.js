@@ -186,7 +186,7 @@ export class InputController {
             this.cancelDrag();
             return;
         }
-
+        
         this.cancelDrag();
     }
 

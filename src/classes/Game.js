@@ -419,11 +419,6 @@ export class Game {
 
         this.discardCount++;
 
-        if (this.player.hand.length === 0 && this.player.deck === 0) {
-            this.endGame(false);
-            return true;
-        }
-
         if (this.action === REQUIRED_DISCARD) {
             if (this.discardCount >= this.discardRequired) {
                 this.endTurn();
@@ -440,6 +435,11 @@ export class Game {
         if (this.discardCount === 2) {
             this.endTurn();
         } else {
+            if (this.player.hand.length === 0 && this.player.deck.cards.length === 0) {
+                this.endGame(false);
+                return true;
+            }
+
             this.msg = DISCARD_MSG;
             this.input.cancelDrag();
         }
@@ -566,8 +566,6 @@ export class Game {
             return false;
         }
 
-        // The player must actually click the cell containing
-        // the last played card.
         const clickedCell = this.board.getCellAtPosition(x, y);
 
         if (clickedCell !== originalCell) {
@@ -581,7 +579,6 @@ export class Game {
 
         this.input.dragOriginalCell = originalCell;
 
-        // Remove it temporarily so it can be moved.
         this.board.removeCard(originalCell);
 
         this.input.draggedCard = this.lastPlayedCard;
@@ -607,7 +604,6 @@ export class Game {
             return false;
         }
 
-        // Moving back to the original position is always valid.
         if (cell === this.input.dragOriginalCell) {
             this.board.placeCard(
                 cell.row,
@@ -772,9 +768,6 @@ export class Game {
         this.discardRequired = 0;
 
         this.input.cancelDrag();
-
-
-
         this.action = DRAW_CARDS;
         this.msg = "";
     }

@@ -168,10 +168,6 @@ export class Player {
             DISCARD,
             this.discardX + this.discardSize / 2,
             this.discardY - this.uiMargin / 2,
-            // {
-            //     fillStyle: "white",
-            //     textAlign: "center",
-            // }
         );
 
         if (card) {
