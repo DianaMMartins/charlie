@@ -648,16 +648,14 @@ export class Game {
     renderDrawBtn() {
         this.drawBtn = null;
 
-        if (this.action !== DRAW_CARDS) {
+        if (this.action !== DRAW_CARDS || this.isLastHand()) {
             return;
         }
 
         const width = BTN_WIDTH;
         const height = BTN_H;
         const borderWidth = 3;
-
         const x = this.canvas.width / 2 - width / 2;
-
         const y = this.player.handY - height - UI_MARGIN;
 
         this.drawBtn = { x, y, width, height };
@@ -695,6 +693,10 @@ export class Game {
                 fillStyle: "black"
             }
         );
+    }
+
+    isLastHand() {
+        return this.player.hand.length <= 5 && this.player.deck.cards.length === 0
     }
 
     isDrawBtnClicked(x, y) {
@@ -768,7 +770,7 @@ export class Game {
         this.discardRequired = 0;
 
         this.input.cancelDrag();
-        this.action = DRAW_CARDS;
+        this.action = this.isLastHand() ? PLAY_CARD : DRAW_CARDS;
         this.msg = "";
     }
 
