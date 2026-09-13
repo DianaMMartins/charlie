@@ -1,6 +1,5 @@
 export const START = 'start';
 export const TUTORIAL = 'tut'
-export const END = 'end';
 export const GAME_PLAY = 'play';
 export const DISCARD = 'Discard';
 
@@ -14,7 +13,6 @@ export const GAME_WON = 6;
 export const GAME_LOST = 7;
 
 export const PLAY_MSG = 'Drag 1 card to Play or discard 2';
-export const DISCARD_MSG = 'Discard another card';
 
 export const COMPLETE_BOARD_MSG = 'Board must be full';
 export const WRONG_PLAY = 'Card must be played in matching area';

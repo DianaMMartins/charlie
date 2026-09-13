@@ -1,4 +1,4 @@
-import { DEFAULT_MARGIN, BOARD_SIZE, BTN_H, BTN_WIDTH, ANGLE } from "../../enum/gameSizes";
+import { DEFAULT_MARGIN, BOARD_SIZE, BTN_H, BTN_WIDTH } from "../../enum/gameSizes";
 import { renderRainbowBorder, renderRainbowText } from "../../utils/canvas";
 import { isPointInsideRect } from "../../utils/geometry";
 import { ParticleBackground } from "../Background";
@@ -25,7 +25,7 @@ export class Overlay {
             return;
         }
 
-        this.gradientAngle += ANGLE;
+        this.gradientAngle += 0.01;
     }
 
     render(ctx, width, height) {

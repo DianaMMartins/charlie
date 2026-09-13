@@ -18,21 +18,21 @@ export class InputController {
     }
 
     setup() {
-        this.game.canvas.addEventListener("pointerdown", (e) => this.startDrag(e));
+        this.game.c.addEventListener("pointerdown", (e) => this.startDrag(e));
 
-        this.game.canvas.addEventListener("pointermove", (e) => this.updateDrag(e));
+        this.game.c.addEventListener("pointermove", (e) => this.updateDrag(e));
 
-        this.game.canvas.addEventListener("pointerup", (e) => this.endDrag(e));
+        this.game.c.addEventListener("pointerup", (e) => this.endDrag(e));
 
-        this.game.canvas.addEventListener("pointercancel", () => this.cancelDrag());
+        this.game.c.addEventListener("pointercancel", () => this.cancelDrag());
     }
 
     getPointerPosition(e) {
-        const canvas = this.game.canvas;
-        const rect = canvas.getBoundingClientRect();
+        const c = this.game.c;
+        const rect = c.getBoundingClientRect();
 
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        const scaleX = c.width / rect.width;
+        const scaleY = c.height / rect.height;
 
         return {
             x: (e.clientX - rect.left) * scaleX,
@@ -54,7 +54,7 @@ export class InputController {
         }
 
         if (this.game.isShowDiscardClicked(x, y)) {
-            this.game.openDiscardOverlayFromButton();
+            this.game.openDiscardOverlayFromBtn();
             return;
         }
 
@@ -67,7 +67,7 @@ export class InputController {
             this.game.startLastCardDrag(x, y);
 
             if (this.dragging) {
-                this.game.canvas.setPointerCapture(e.pointerId);
+                this.game.c.setPointerCapture(e.pointerId);
             }
 
             return;
@@ -98,7 +98,7 @@ export class InputController {
         this.dragX = cardX;
         this.dragY = cardY;
 
-        this.game.canvas.setPointerCapture(e.pointerId);
+        this.game.c.setPointerCapture(e.pointerId);
     }
 
     updateDrag(e) {

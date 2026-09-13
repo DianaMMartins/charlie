@@ -1,9 +1,9 @@
 import {
     HAND_SIZE,
     BOARD_SIZE,
-    CARD_DIMENSIONS,
+    CARD_SIZE,
     HAND_CARD_GAP,
-    DISCARD_DIMENSIONS,
+    DISCARD_SIZE,
     UI_MARGIN
 } from "../enum/gameSizes";
 import { DISCARD } from "../enum/gameStatus";
@@ -31,9 +31,9 @@ export class Player {
 
         this.scale = 1;
 
-        this.cardSize = CARD_DIMENSIONS;
+        this.cardSize = CARD_SIZE;
         this.cardGap = HAND_CARD_GAP;
-        this.discardSize = DISCARD_DIMENSIONS;
+        this.discardSize = DISCARD_SIZE;
         this.uiMargin = UI_MARGIN;
 
         this.drawCards(HAND_SIZE);
@@ -69,20 +69,20 @@ export class Player {
     setScale(scale) {
         this.scale = scale;
 
-        this.cardSize = CARD_DIMENSIONS * scale;
+        this.cardSize = CARD_SIZE * scale;
         this.cardGap = HAND_CARD_GAP * scale;
-        this.discardSize = DISCARD_DIMENSIONS * scale;
+        this.discardSize = DISCARD_SIZE * scale;
         this.uiMargin = UI_MARGIN * scale;
     }
 
     getBaseWidth() {
         return (
-            CARD_DIMENSIONS +
+            CARD_SIZE +
             UI_MARGIN +
-            (HAND_SIZE * CARD_DIMENSIONS) +
+            (HAND_SIZE * CARD_SIZE) +
             ((HAND_SIZE - 1) * HAND_CARD_GAP) +
             UI_MARGIN +
-            DISCARD_DIMENSIONS
+            DISCARD_SIZE
         );
     }
 

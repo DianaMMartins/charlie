@@ -1,7 +1,7 @@
 import { Player } from "./Player";
 import { Board } from "./Board";
 import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN, HAND_CARD_GAP, HAND_SIZE, UI_MARGIN } from "../enum/gameSizes"; import { FINISH_CARD, NUMBER_CARD, START_CARD } from "../enum/cardTypes.";
-import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, DISCARD_MSG, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL, DRAW_CARDS, WRONG_PLAY } from "../enum/gameStatus";
+import { START, GAME_PLAY, PLAY_MSG, DISCARD_CARD, PLAY_CARD, COMPLETE_BOARD_MSG, PLAY_START_MSG, PLAY_START_CARD, DISCARD_START_CARDS, REQUIRED_DISCARD, GAME_LOST, GAME_WON, TUTORIAL, DRAW_CARDS, WRONG_PLAY } from "../enum/gameStatus";
 import { StartOverlay } from "./overlays/StartOverlay";
 import { DiscardOverlay } from "./overlays/DiscardOverlay";
 import { EndOverlay } from "./overlays/EndOverlay";
@@ -14,8 +14,8 @@ import { TutorialOverlay } from "./overlays/TutorialOverlay";
 
 export class Game {
     constructor() {
-        this.canvas = document.querySelector("#game");
-        this.ctx = this.canvas.getContext("2d");
+        this.c = document.querySelector("#game");
+        this.ctx = this.c.getContext("2d");
 
         this.board = new Board();
         this.player = new Player();
@@ -110,21 +110,21 @@ export class Game {
         this.ctx.clearRect(
             0,
             0,
-            this.canvas.width,
-            this.canvas.height
+            this.c.width,
+            this.c.height
         );
 
         this.ctx.fillRect(
             0,
             0,
-            this.canvas.width,
-            this.canvas.height
+            this.c.width,
+            this.c.height
         );
 
         this.background.render(
             this.ctx,
-            this.canvas.width,
-            this.canvas.height
+            this.c.width,
+            this.c.height
         );
 
         this.board.render(this.ctx);
@@ -133,8 +133,8 @@ export class Game {
         if (this.overlay) {
             this.overlay.render(
                 this.ctx,
-                this.canvas.width,
-                this.canvas.height
+                this.c.width,
+                this.c.height
             );
         } else {
             this.renderMsg();
@@ -180,7 +180,7 @@ export class Game {
             renderRainbowText(
                 this.ctx,
                 line,
-                this.canvas.width / 2,
+                this.c.width / 2,
                 startY + index * lineHeight,
                 {
                     font: "20px sans-serif",
@@ -270,7 +270,7 @@ export class Game {
         return isPointInsideRect(x, y, this.showDiscardBtn);
     }
 
-    openDiscardOverlayFromButton() {
+    openDiscardOverlayFromBtn() {
         this.overlay = this.discardOverlay;
         this.discardOverlay.show();
     }
@@ -279,8 +279,8 @@ export class Game {
         const screenWidth = window.innerWidth;
         const height = window.innerHeight;
 
-        this.canvas.width = screenWidth;
-        this.canvas.height = height;
+        this.c.width = screenWidth;
+        this.c.height = height;
 
         this.board.resize(screenWidth);
         this.player.resize(screenWidth);
@@ -297,12 +297,12 @@ export class Game {
     }
 
     getLayoutStartY() {
-        const totalHeight = this.getLayoutHeight();
+        const totalHeight = this.getLayoutH();
 
-        return (this.canvas.height - totalHeight) / 2;
+        return (this.c.height - totalHeight) / 2;
     }
 
-    getLayoutHeight() {
+    getLayoutH() {
         return (
             this.board.height +
             this.msgHeight +
@@ -312,7 +312,7 @@ export class Game {
     }
 
     layoutBoard(startY) {
-        this.board.x = (this.canvas.width - this.board.width) / 2;
+        this.board.x = (this.c.width - this.board.width) / 2;
         this.board.y = startY;
     }
 
@@ -327,7 +327,7 @@ export class Game {
     layoutPlayer() {
         const playerY = this.msgY + this.msgHeight / 2 + this.layoutGap;
 
-        this.player.setLayout(this.canvas.width, playerY);
+        this.player.setLayout(this.c.width, playerY);
     }
 
     canDropCard(cell, card) {
@@ -360,7 +360,7 @@ export class Game {
         return false;
     }
 
-    isPlayerOutOfCards() {
+    isPOutOfCards() {
         return (
             this.player.hand.length === 0 &&
             this.player.deck.cards.length === 0
@@ -386,7 +386,7 @@ export class Game {
 
         this.player.removeCard(card);
 
-        if (this.isPlayerOutOfCards()) {
+        if (this.isPOutOfCards()) {
             this.endGame(false);
             return;
         }
@@ -432,7 +432,7 @@ export class Game {
 
         this.discardCount++;
 
-        if (this.isPlayerOutOfCards()) {
+        if (this.isPOutOfCards()) {
             this.endGame(false);
             return true;
         }
@@ -453,12 +453,12 @@ export class Game {
         if (this.discardCount === 2) {
             this.endTurn();
         } else {
-            if (this.isPlayerOutOfCards()) {
+            if (this.isPOutOfCards()) {
                 this.endGame(false);
                 return true;
             }
 
-            this.msg = DISCARD_MSG;
+            this.msg = 'Discard another card';
             this.input.cancelDrag();
         }
 
@@ -648,14 +648,14 @@ export class Game {
     renderDrawBtn() {
         this.drawBtn = null;
 
-        if (this.action !== DRAW_CARDS || this.isPlayerOutOfCards()) {
+        if (this.action !== DRAW_CARDS || this.isPOutOfCards()) {
             return;
         }
 
         const width = BTN_WIDTH;
         const height = BTN_H;
         const borderWidth = 3;
-        const x = this.canvas.width / 2 - width / 2;
+        const x = this.c.width / 2 - width / 2;
         const y = this.player.handY - height - UI_MARGIN;
 
         this.drawBtn = { x, y, width, height };
@@ -706,7 +706,7 @@ export class Game {
         const size = DEFAULT_MARGIN;
         const margin = HAND_CARD_GAP;
 
-        const x = this.canvas.width - size - margin;
+        const x = this.c.width - size - margin;
         const y = margin;
 
         this.audioBtn = {
@@ -757,7 +757,7 @@ export class Game {
         this.discardCount = 0;
         this.discardRequired = 0;
 
-        if (this.isPlayerOutOfCards()) {
+        if (this.isPOutOfCards()) {
             this.endGame(false);
             return;
         }

@@ -1,4 +1,4 @@
-import { BOARD_SIZE, CARD_DIMENSIONS } from "../enum/gameSizes";
+import { BOARD_SIZE, CARD_SIZE } from "../enum/gameSizes";
 import { CARD_BACK_IMAGE, CARD_FRONT_IMAGE } from "../assets";
 import { renderRainbowBorder as rainbowBorder, renderRainbowText, renderText } from "../utils/canvas";
 
@@ -8,7 +8,7 @@ export class Card {
         this.revealed = false;
     }
 
-    render(ctx, x, y, size = CARD_DIMENSIONS) {
+    render(ctx, x, y, size = CARD_SIZE) {
         if (this.revealed) {
             this.renderFront(ctx, x, y, size);
         } else {
@@ -16,12 +16,12 @@ export class Card {
         }
     }
 
-    renderBack(ctx, x, y, size = CARD_DIMENSIONS) {
+    renderBack(ctx, x, y, size = CARD_SIZE) {
         this.renderCardBackImg(ctx, x, y, size);
         rainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
     }
 
-    renderFront(ctx, x, y, size = CARD_DIMENSIONS) {
+    renderFront(ctx, x, y, size = CARD_SIZE) {
         this.renderCardFront(ctx, x, y, size);
         rainbowBorder(ctx, x, y, size, size, 2, BOARD_SIZE);
     }
