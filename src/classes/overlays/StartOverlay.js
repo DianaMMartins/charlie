@@ -1,3 +1,4 @@
+import { CARD_FRONT_IMAGE } from "../../assets";
 import { BTN_H, BTN_WIDTH, DEFAULT_MARGIN } from "../../enum/gameSizes";
 import { Overlay } from "./Overlay";
 
@@ -22,7 +23,9 @@ export class StartOverlay extends Overlay {
         super.render(ctx, width, height);
 
         const gap = DEFAULT_MARGIN;
-        const totalHeight = DEFAULT_MARGIN + gap + BTN_H;
+        const charlieSize = 320;
+
+        const totalHeight = DEFAULT_MARGIN + gap + charlieSize + gap + BTN_H;
         const y = this.getCenteredY(height, totalHeight);
 
         this.renderTitle(
@@ -32,10 +35,18 @@ export class StartOverlay extends Overlay {
             y + DEFAULT_MARGIN / 2
         );
 
+        ctx.drawImage(
+            CARD_FRONT_IMAGE,
+            (width - charlieSize) / 2,
+            y + DEFAULT_MARGIN + gap,
+            charlieSize,
+            charlieSize
+        );
+
         this.renderBtn(
             ctx,
             (width - BTN_WIDTH) / 2,
-            y + DEFAULT_MARGIN + gap,
+            y + DEFAULT_MARGIN + gap + charlieSize + gap,
             "Start"
         );
     }
