@@ -205,7 +205,7 @@ export class Player {
 
         const padding = 1;
 
-        ctx.fillStyle = "rgb(212, 212, 212, 0.7)";
+        ctx.fillStyle = "rgba(21, 37, 88, 0.8)";
 
         ctx.beginPath();
 
@@ -225,7 +225,7 @@ export class Player {
     drawEmptyDiscard(ctx) {
         ctx.save();
 
-        ctx.fillStyle = "rgb(212, 212, 212)";
+        ctx.fillStyle = "rgba(21, 37, 88, 0.8)";
         ctx.beginPath();
 
         ctx.roundRect(

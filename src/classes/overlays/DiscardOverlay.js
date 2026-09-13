@@ -80,7 +80,7 @@ export class DiscardOverlay extends Overlay {
         const btnStartX = (width - totalBtnWidth) / 2;
 
         this.discardBtn = this.renderBtn(ctx, btnStartX, btnY, DISCARD, this.selectedCards.length === 8, DISCARD);
-        this.hideBtn = this.renderBtn(ctx, btnStartX + btnWidth + gap, btnY, "Hide", true, "hide", "white");
+        this.hideBtn = this.renderBtn(ctx, btnStartX + btnWidth + gap, btnY, "Hide", true, "hide", "rgba(21, 37, 88, 0.8)");
     }
 
     renderCards(ctx, width, startY) {

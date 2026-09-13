@@ -7,7 +7,7 @@ import {
 } from "../../enum/gameSizes";
 import { RULES } from "../../enum/gameStatus";
 import { Overlay } from "./Overlay";
-import { renderRainbowText } from "../../utils/canvas";
+import { renderText } from "../../utils/canvas";
 
 export class TutorialOverlay extends Overlay {
     constructor() {
@@ -124,11 +124,11 @@ export class TutorialOverlay extends Overlay {
         const x = centerX - boardWidth / 2;
 
         const cells = [
-            ["", "", "", "", "F"],
-            ["", "7", "8", "9", ""],
-            ["", "4", "5", "6", ""],
-            ["", "1", "2", "3", ""],
-            ["S", "", "", "", ""]
+            [null, null, null, null, "F"],
+            [null, 7, 8, 9, null],
+            [null, 4, 5, 6, null],
+            [null, 1, 2, 3, null],
+            ["S", null, null, null, null]
         ];
 
         for (let row = 0; row < cells.length; row++) {
@@ -190,7 +190,7 @@ export class TutorialOverlay extends Overlay {
     renderMiniCellBackground(ctx, x, y, size) {
         ctx.save();
 
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "rgba(21, 37, 88, 0.8)";
 
         ctx.fillRect(
             x,
@@ -212,7 +212,7 @@ export class TutorialOverlay extends Overlay {
     }
 
     renderMiniLabel(c, x, y, size, label) {
-        renderRainbowText(
+        renderText(
             c,
             label,
             x + size / 2,

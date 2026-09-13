@@ -225,7 +225,7 @@ export class Game {
 
         this.ctx.save();
 
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = "rgba(21, 37, 88, 0.8)";
 
         this.ctx.beginPath();
         this.ctx.roundRect(
@@ -253,12 +253,9 @@ export class Game {
 
         renderText(
             this.ctx,
-            "Open to Discard!",
+            "Open to Discard",
             x + width / 2,
-            y + height / 2,
-            {
-                fillStyle: "black"
-            }
+            y + height / 2
         );
     }
 
@@ -661,7 +658,7 @@ export class Game {
         this.drawBtn = { x, y, width, height };
 
         this.ctx.save();
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = "rgba(21, 37, 88, 0.8)";
         this.ctx.beginPath();
         this.ctx.roundRect(
             x,
@@ -689,9 +686,6 @@ export class Game {
             "Draw",
             x + width / 2,
             y + height / 2,
-            {
-                fillStyle: "black"
-            }
         );
     }
 

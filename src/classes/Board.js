@@ -85,7 +85,7 @@ export class Board {
                         this.cellSize
                     );
                 } else if (!cell.card) {
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = "rgba(21, 37, 88, 0.8)";
 
                     ctx.fillRect(
                         x,
@@ -127,7 +127,7 @@ export class Board {
                 ? "rgb(32, 187, 32)"
                 : "rgb(168, 32, 32)";
         } else {
-            ctx.fillStyle = "white";
+            ctx.fillStyle = "rgba(21, 37, 88, 0.8)";
         }
 
         ctx.fillRect(
